@@ -21,12 +21,44 @@
       }
 
       #messages {
-        padding: 15px;
+        padding: 0px 15px 15px 15px;
+        margin-left: 30px;
+        margin-right: 35%;
+      }
+
+      #sidebar {
+        width: 35%;
+        position: fixed;
+        top: 0;
+        bottom: 0;
+        right: 0;
+        background-color: white;
+        color: #333;
+        padding: 5px;
+        overflow: scroll;
+      }
+
+      #toolbox {
+        width: 30px;
+        background-color: white;
+        position: fixed;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        text-align: center;
+      }
+
+      #toolbox, #sidebar {
+        box-shadow: 0px 0px 20px black;
       }
 
       table {
         border-collapse: collapse;
         width: 100%;
+      }
+
+      table tr:first-child {
+        border-bottom: 1px dashed #ccc;
       }
 
       td, th {
@@ -45,6 +77,11 @@
 
       td:empty {
         background-color: #dd2222;
+      }
+
+      th.msg-count {
+        min-width: 50px;
+        max-width: 50px;
       }
 
       th.msg-timestamp {
@@ -76,18 +113,6 @@
         cursor: pointer;
       }
 
-      #sidebar {
-        width: 35%;
-        position: fixed;
-        top: 0;
-        bottom: 0;
-        right: 0;
-        background-color: white;
-        color: #333;
-        padding: 5px;
-        overflow: scroll;
-      }
-
       #sidebar h2 {
         font-family: sans-serif;
         font-weight: bold;
@@ -95,18 +120,46 @@
         padding-left: 10px;
       }
 
-      #sidebar h3 {
+      .value {
+        height: 20px;
+      }
+
+      .value h3 {
         float: left;
-        clear: both;
         font-family: sans-serif;
         font-weight: bold;
+        font-size: 14px;
         width: 90px;
         margin: 0;
       }
 
-      #sidebar p {
+      .value .hide-filter + h3 {
+        padding-left: 26px;
+      }
+
+      .value [type='checkbox'] {
         float: left;
-        margin: 0;
+        width: 20px;
+        clear: both;
+        margin-top: 2px;
+      }
+
+      .value [type='checkbox'].hide-filter {
+        display: none;
+      }
+
+      .value span {
+        display: inline-block;
+        margin-top: -3px;
+      }
+
+      #sidebar .filters {
+        margin-top: 5px;
+        margin-left: 28px;
+      }
+
+      #sidebar .filters button {
+        margin-right: 5px;
       }
 
       #sidebar pre {
@@ -114,10 +167,28 @@
         clear: both;
         padding-top: 20px;
       }
+
+      #toolbox button {
+        color: black;
+        border: 1px solid black;
+        width: 20px;
+        height: 20px;
+        background: none;
+        cursor: pointer;
+        margin-top: 10px;
+        -webkit-transition: all 0.1s ease-in;
+        outline: none;
+      }
+
+      #toolbox button:hover {
+        background-color: black;
+        color: white;
+      }
     </style>
   </head>
   <body>
     <div id="container">
+      <div id="toolbox"></div>
       <div id="messages"></div>
       <div id="sidebar"></div>
     </div>

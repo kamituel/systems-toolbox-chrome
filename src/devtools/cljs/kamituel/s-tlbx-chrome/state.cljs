@@ -3,8 +3,10 @@
 
 (defonce initial-state
   (atom {:messages '()
-   :state-snapshots '()
-   :selected-message nil}))
+         :state-snapshots '()
+         :selected-message nil
+         :filter-in []
+         :filter-out []}))
 
 (defn kinda-guid
   "Generates a GUID-looking string. Does not conform to RFC though."
@@ -34,18 +36,50 @@
                sent-message)))
          sent)))
 
+(defn message-matches-all-criteria?
+  [pred-fn filter-criteria msg]
+  (let [msg-matches-one-criterium? (fn [{:keys [src-cmp dst-cmp cmd]} msg]
+                                     (and (if src-cmp (= src-cmp (-> msg :msg-payload :cmp-id)) true)
+                                          (if dst-cmp (= dst-cmp (:dest-cmp msg)) true)
+                                          (if cmd (= cmd (-> msg :msg-payload :msg first)) true)))]
+   (pred-fn #(msg-matches-one-criterium? % msg) filter-criteria)))
+
+(defn apply-message-filters
+  [cmp-state messages]
+  (->> messages
+       (filter (partial message-matches-all-criteria? every? (:filter-in @cmp-state)))
+       (filter (partial message-matches-all-criteria? not-any? (:filter-out @cmp-state)))))
+
 (defn handle-new-messages
   "Analyzes new messages and appends them to the :messages list in a state."
   [{:keys [cmp-state msg-payload]}]
   (let [messages (->> msg-payload
                       correlate-sender-with-receiver
+                      (apply-message-filters cmp-state)
                       (map #(assoc % :guid (kinda-guid))))]
    (swap! cmp-state update-in [:messages] #(concat messages %))))
 
 (defn show-message-details
   "Makes one message selected, so it can be shown in the sidebar."
   [{:keys [cmp-state msg-payload]}]
+  (prn "showing msg detauls" msg-payload)
   (swap! cmp-state assoc :selected-message msg-payload))
+
+(defn add-filter-inclusive
+  "Filters out all messages BUT the ones maching cirteria given."
+  [{:keys [cmp-state msg-payload]}]
+  (swap! cmp-state update-in [:filter-in] conj msg-payload)
+  (swap! cmp-state update-in [:messages] (partial apply-message-filters cmp-state)))
+
+(defn add-filter-exclusive
+  "Filters out all messages matching criteria given."
+  [{:keys [cmp-state msg-payload]}]
+  (swap! cmp-state update-in [:filter-out] conj msg-payload)
+  (swap! cmp-state update-in [:messages] (partial apply-message-filters cmp-state)))
+
+(defn clear-messages
+  [{:keys [cmp-state]}]
+  (swap! cmp-state assoc :messages '()))
 
 (defn mk-state
   [put-fn]
@@ -55,5 +89,8 @@
   [cmp-id]
   (comp/make-component {:cmp-id      cmp-id
                         :state-fn    mk-state
-                        :handler-map {:cmd/new-messages    handle-new-messages
-                                      :cmd/message-details show-message-details}}))
+                        :handler-map {:cmd/new-messages         handle-new-messages
+                                      :cmd/message-details      show-message-details
+                                      :cmd/filter-in-messages   add-filter-inclusive
+                                      :cmd/filter-out-messages  add-filter-exclusive
+                                      :cmd/clear-messages       clear-messages}}))
