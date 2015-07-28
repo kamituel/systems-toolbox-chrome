@@ -9,8 +9,7 @@
 
 (defn view-fn
   [{:keys [observed local cmd]}]
-  (prn "re-render" observed)
-  (let [messages (:messages observed)
+  (let [messages (:messages @observed)
         last-ts (-> messages last :msg-meta :frntnd/dev-tools :in-timestamp)]
     [:div "Messages received: " (count messages)
      [:table

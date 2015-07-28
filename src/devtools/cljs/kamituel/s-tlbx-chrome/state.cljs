@@ -37,7 +37,6 @@
 (defn handle-new-messages
   "Analyzes new messages and appends them to the :messages list in a state."
   [{:keys [cmp-state msg-payload]}]
-  (prn (count msg-payload) (count (:messages @cmp-state)) (keys @cmp-state))
   (let [messages (->> msg-payload
                       correlate-sender-with-receiver
                       (map #(assoc % :guid (kinda-guid))))]

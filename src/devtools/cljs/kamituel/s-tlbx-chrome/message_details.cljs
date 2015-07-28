@@ -22,8 +22,7 @@
 
 (defn view-fn
   [{:keys [observed local cmd]}]
-  (prn "re-render detauls" observed)
-  (let [{:keys [msg-meta msg-payload dest-cmp] :as msg} (:message @local)
+  (let [{:keys [msg-meta msg-payload dest-cmp] :as msg} (:selected-message @observed)
         ts (-> msg-meta :frntnd/dev-tools :in-timestamp)]
     (if msg
       [:div
