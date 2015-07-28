@@ -3,10 +3,11 @@
 
 (defonce initial-state
   (atom {:messages '()
-         :state-snapshots '()
+         :state-snapshots {}
          :selected-message nil
          :filter-in []
-         :filter-out []}))
+         :filter-out []
+         :view :messages}))
 
 (defn kinda-guid
   "Generates a GUID-looking string. Does not conform to RFC though."
@@ -53,11 +54,22 @@
 (defn handle-new-messages
   "Analyzes new messages and appends them to the :messages list in a state."
   [{:keys [cmp-state msg-payload]}]
+  (prn "new messages")
   (let [messages (->> msg-payload
                       correlate-sender-with-receiver
                       (apply-message-filters cmp-state)
                       (map #(assoc % :guid (kinda-guid))))]
    (swap! cmp-state update-in [:messages] #(concat messages %))))
+
+(defn handle-new-state-snapshots
+  ""
+  [{:keys [cmp-state msg-payload]}]
+  (let [last-snapshot-for-each-cmp (->> msg-payload
+                                        (group-by #(-> % :msg-payload :cmp-id))
+                                        (map (fn [[cmp-id snapshots]]
+                                               [cmp-id (first snapshots)]))
+                                        (into {}))]
+   (swap! cmp-state update-in [:state-snapshots] #(merge % last-snapshot-for-each-cmp))))
 
 (defn show-message-details
   "Makes one message selected, so it can be shown in the sidebar."
@@ -78,8 +90,15 @@
   (swap! cmp-state update-in [:messages] (partial apply-message-filters cmp-state)))
 
 (defn clear-messages
+  "Clears the list of messages."
   [{:keys [cmp-state]}]
   (swap! cmp-state assoc :messages '()))
+
+(defn show-component
+  "Shows eitehr a messages, or snapshots panel."
+  [{:keys [cmp-state msg-payload]}]
+  (prn "show" msg-payload)
+  (.setAttribute (.. js/document -body) "view" (name msg-payload)))
 
 (defn mk-state
   [put-fn]
@@ -90,7 +109,9 @@
   (comp/make-component {:cmp-id      cmp-id
                         :state-fn    mk-state
                         :handler-map {:cmd/new-messages         handle-new-messages
+                                      :cmd/new-state-snapshots  handle-new-state-snapshots
                                       :cmd/message-details      show-message-details
                                       :cmd/filter-in-messages   add-filter-inclusive
                                       :cmd/filter-out-messages  add-filter-exclusive
-                                      :cmd/clear-messages       clear-messages}}))
+                                      :cmd/clear-messages       clear-messages
+                                      :cmd/show-component       show-component}}))

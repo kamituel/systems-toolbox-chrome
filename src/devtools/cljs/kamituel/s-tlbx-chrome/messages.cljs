@@ -17,8 +17,7 @@
        [:th.msg-timestamp "Timestamp [s]"]
        [:th.msg-from-component "From component"]
        [:th.msg-to-component "To component"]
-       [:th.msg-command "Command"]
-       [:th.msg-message "Message"]]
+       [:th.msg-command "Command"]]
       (for [{:keys [idx guid msg-meta msg-payload dest-cmp] :as msg}
             (map-indexed (fn [idx msg] (assoc msg :idx idx)) (reverse messages))]
         ^{:key guid}

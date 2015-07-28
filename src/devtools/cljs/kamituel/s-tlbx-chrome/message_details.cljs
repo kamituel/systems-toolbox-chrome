@@ -52,7 +52,6 @@
   [{:keys [observed local cmd]}]
   (let [{:keys [msg-meta msg-payload dest-cmp] :as msg} (:selected-message @observed)
         ts (-> msg-meta :frntnd/dev-tools :in-timestamp)]
-    (prn "selected msg" msg)
     (if msg
       [:div
        (filtered-label-value {:filterable? true :local local :filter-id :src-cmp :label "Source"

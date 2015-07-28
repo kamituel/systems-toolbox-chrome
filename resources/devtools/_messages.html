@@ -20,10 +20,32 @@
         height: 100%;
       }
 
-      #messages {
+      #messages, #state-snapshots {
         padding: 0px 15px 15px 15px;
         margin-left: 30px;
+        display :none;
+      }
+
+      #messages {
         margin-right: 35%;
+      }
+
+      #state-snapshots {
+        height: 100%;
+        margin-right: 35px;
+        position: relative;
+      }
+
+      body[view='messages'] #messages {
+        display: block;
+      }
+
+      body[view='state-snapshots'] #state-snapshots {
+        display: block;
+      }
+
+      body[view='state-snapshots'] #sidebar {
+        display: none;
       }
 
       #sidebar {
@@ -101,10 +123,6 @@
 
       th.msg-command {
         min-width: 170px;
-        max-width: 170px;
-      }
-
-      th.msg-message {
         width: 100%;
       }
 
@@ -168,8 +186,14 @@
         padding-top: 20px;
       }
 
-      #toolbox button {
-        color: black;
+      #toolbox #components {
+        background-color: #333;
+        width: 30px;
+        padding-bottom: 10px;
+      }
+
+      #components button,
+      #tools button {
         border: 1px solid black;
         width: 20px;
         height: 20px;
@@ -180,16 +204,73 @@
         outline: none;
       }
 
-      #toolbox button:hover {
+      #components button {
+        border-color: white;
+        color: white;
+      }
+
+      #tools button {
+        color: black;
+      }
+
+      #tools button:hover {
         background-color: black;
         color: white;
       }
+
+      #components button:hover {
+        background-color: white;
+        color: black;
+      }
+
+      #state-snapshots ul.tabs {
+        list-style-type: none;
+        padding: 0;
+        margin: 0;
+        margin-top: 10px;
+      }
+
+      #state-snapshots ul.tabs li {
+        display: inline-block;
+        height: 12px;
+        font-size: 11px;
+        padding: 2px 8px 3px 8px;
+        border: 1px dashed white;
+        cursor: pointer;
+        -webkit-transition: all 0.15s ease-in;
+      }
+
+      ul.tabs li:hover, ul.tabs li.selected {
+        background-color: white;
+        color: black;
+      }
+
+      #state-snapshots pre {
+        position: absolute;
+        top: 18px;
+        bottom: 10px;
+        left: 14px;
+        right: 10px;
+        padding: 10px;
+        overflow-y: scroll;
+        background-color: white;
+        color: black;
+        font-size: 14px;
+        line-height: 14px;
+        word-wrap: break-word;
+      }
     </style>
   </head>
-  <body>
+  <body view="state-snapshots">
     <div id="container">
-      <div id="toolbox"></div>
+      <div id="toolbox">
+        <div id="components">
+        </div>
+        <div id="tools">
+        </div>
+      </div>
       <div id="messages"></div>
+      <div id="state-snapshots"></div>
       <div id="sidebar"></div>
     </div>
     <script src="js/all.js"></script>

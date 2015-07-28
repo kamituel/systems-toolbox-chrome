@@ -7,7 +7,11 @@
   [{:keys [observed local cmd]}]
   (let []
     [:div
-     [:button {:on-click (cmd :cmd/clear-messages)} "C"]]))
+     [:div#components
+      [:button {:on-click (cmd :cmd/show-component :cmp/messages)} "m"]
+      [:button {:on-click (cmd :cmd/show-component :cmp/state-snapshots)} "s"]]
+     [:div#tools
+      [:button {:on-click (cmd :cmd/clear-messages)} "c"]]]))
 
 (defn component
   [cmp-id]

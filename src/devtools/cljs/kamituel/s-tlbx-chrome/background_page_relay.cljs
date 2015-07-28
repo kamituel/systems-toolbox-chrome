@@ -27,11 +27,13 @@
 
 (defn read-from-app
   [{:keys [put-fn]}]
-  (let [eval-js "clj_web_client_console.devtools.read_commands();"]
-    (.eval (chrome/inspected-window) eval-js (fn [response is-exception?]
-                                               (let [msg (decode-js-keywords (js->clj response :keywordize-keys true))]
-                                                 ; (prn "msg in relay" msg)
-                                                 (put-fn [:cmd/new-messages msg]))))))
+  (let [eval-js "clj_web_client_console.devtools.read_recordings();"
+        handle-response (fn [response err]
+                          (let [{:keys [messages state-snapshots]}
+                                (decode-js-keywords (js->clj response :keywordize-keys true))]
+                            (put-fn [:cmd/new-messages messages])
+                            (put-fn [:cmd/new-state-snapshots state-snapshots])))]
+    (.eval (chrome/inspected-window) eval-js handle-response)))
 
 
 ; (defn init-background-page
