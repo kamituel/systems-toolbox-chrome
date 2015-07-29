@@ -4,9 +4,6 @@
   "description": "Chrome DevTools support for systems-toolbox library",
   "version": "0.0.1",
   "devtools_page": "resources/devtools/devtools.html",
-  "background": {
-    "scripts": ["src/background/background.js"]
-  },
   "permissions": [
     "tabs",
     "*://*/*"

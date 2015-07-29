@@ -9,7 +9,7 @@
       body {
         padding: 0;
         margin: 0;
-        background-color: #333;
+        background-color: #222;
         color: white;
         font-family: source-code;
       }
@@ -194,7 +194,7 @@
 
       #components button,
       #tools button {
-        border: 1px solid black;
+        border: none;
         width: 20px;
         height: 20px;
         background: none;
@@ -202,11 +202,12 @@
         margin-top: 10px;
         -webkit-transition: all 0.1s ease-in;
         outline: none;
+        padding: 0;
+        font-size: 14px;
       }
 
       #components button {
-        border-color: white;
-        color: white;
+        color: #888;
       }
 
       #tools button {
@@ -214,13 +215,12 @@
       }
 
       #tools button:hover {
-        background-color: black;
         color: white;
       }
 
-      #components button:hover {
-        background-color: white;
-        color: black;
+      #components button:hover,
+      #components button.selected {
+        color: white;
       }
 
       #state-snapshots ul.tabs {
@@ -245,21 +245,14 @@
         color: black;
       }
 
-      #state-snapshots pre {
-        position: absolute;
-        top: 18px;
-        bottom: 10px;
-        left: 14px;
-        right: 10px;
+      #state-snapshots h2 {
         padding: 10px;
-        overflow-y: scroll;
-        background-color: white;
-        color: black;
-        font-size: 14px;
-        line-height: 14px;
-        word-wrap: break-word;
+        font-size: 13px;
       }
+
     </style>
+    <link rel="stylesheet" href="./styles/edn.css">
+    <link rel="stylesheet" href="./styles/symbol-font.css">
   </head>
   <body view="state-snapshots">
     <div id="container">

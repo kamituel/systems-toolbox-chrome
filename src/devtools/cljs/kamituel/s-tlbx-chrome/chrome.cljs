@@ -7,6 +7,9 @@
 (defn inspected-window [] (.-inspectedWindow devtools))
 (defn tab-id [] (.-tabId (inspected-window)))
 
+;; True if running as a Chrome DevTools extension.
+(def in-chrome? (not (nil? devtools)))
+
 (defn create-sidebar-with-data
   [title data]
   (.createSidebarPane (.. devtools -panels -elements) title

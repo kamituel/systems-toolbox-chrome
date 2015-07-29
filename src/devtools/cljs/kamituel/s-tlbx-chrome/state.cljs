@@ -2,12 +2,12 @@
   (:require [matthiasn.systems-toolbox.component :as comp]))
 
 (defonce initial-state
-  (atom {:messages '()
-         :state-snapshots {}
-         :selected-message nil
-         :filter-in []
-         :filter-out []
-         :view :messages}))
+  {:messages '()
+   :state-snapshots {}
+   :selected-message nil
+   :filter-in []
+   :filter-out []
+   :view :messages})
 
 (defn kinda-guid
   "Generates a GUID-looking string. Does not conform to RFC though."
@@ -54,7 +54,6 @@
 (defn handle-new-messages
   "Analyzes new messages and appends them to the :messages list in a state."
   [{:keys [cmp-state msg-payload]}]
-  (prn "new messages")
   (let [messages (->> msg-payload
                       correlate-sender-with-receiver
                       (apply-message-filters cmp-state)
@@ -62,7 +61,8 @@
    (swap! cmp-state update-in [:messages] #(concat messages %))))
 
 (defn handle-new-state-snapshots
-  ""
+  "Handle new state messages. Only one state for each component is stored, rest is currently
+  discarded."
   [{:keys [cmp-state msg-payload]}]
   (let [last-snapshot-for-each-cmp (->> msg-payload
                                         (group-by #(-> % :msg-payload :cmp-id))
@@ -97,12 +97,12 @@
 (defn show-component
   "Shows eitehr a messages, or snapshots panel."
   [{:keys [cmp-state msg-payload]}]
-  (prn "show" msg-payload)
+  (swap! cmp-state assoc :view msg-payload)
   (.setAttribute (.. js/document -body) "view" (name msg-payload)))
 
 (defn mk-state
   [put-fn]
-  initial-state)
+  (atom initial-state))
 
 (defn component
   [cmp-id]

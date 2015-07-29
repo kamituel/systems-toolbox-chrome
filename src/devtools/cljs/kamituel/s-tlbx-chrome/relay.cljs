@@ -1,4 +1,4 @@
-(ns kamituel.s-tlbx-chrome.background-page-relay
+(ns kamituel.s-tlbx-chrome.relay
   "Relays data to/from extensions's background page."
   (:require [matthiasn.systems-toolbox.component :as comp]
             [kamituel.s-tlbx-chrome.chrome :as chrome]
@@ -34,22 +34,6 @@
                             (put-fn [:cmd/new-messages messages])
                             (put-fn [:cmd/new-state-snapshots state-snapshots])))]
     (.eval (chrome/inspected-window) eval-js handle-response)))
-
-
-; (defn init-background-page
-;  [put-fn]
-;  (let [bckgrnd-conn (.connect runtime (clj->js {:name "s-tlbx-page"}))
- ;       on-msg-fn (fn [msg] (prn "Message from background page:" msg))]
-;    (prn "adding listener")
-;    (.addListener (.-onMessage bckgrnd-conn) on-msg-fn)
-;    (prn "sending inject message")
-;    (.sendMessage runtime (clj->js {:tabId (tab-id)
-;                                    :scriptToInject "src/background/injectable.js"}))
-;    (prn "eval test")
-;    (.eval (inspected-window) "clj_web_client_console.devtools.take_last_n_js(1);" (fn [res is-exception?]
-;                                                                                     (let [msg (js->clj res :keywordize-keys true)]
-;                                                                                       (prn msg (nil? put-fn))
-;                                                                                       (put-fn [:cmd/captured (first msg)]))))))
 
 (defn mk-state
   [put-fn]

@@ -8,6 +8,7 @@
   (subs msg 0 100))
 
 (defn view-fn
+  ;; #^{:component-did-mount #(prn "@!!!!!!!!!!!!")}
   [{:keys [observed local cmd]}]
   (let [messages (:messages @observed)
         last-ts (-> messages last :msg-meta :frntnd/dev-tools :in-timestamp)]
