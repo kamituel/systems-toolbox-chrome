@@ -1,4 +1,4 @@
-(defproject systems-toolbox-chrome "0.1.0-SNAPSHOT"
+(defproject kamituel/systems-toolbox-chrome "0.1.0-SNAPSHOT"
   :description "Chrome DevTools support for systems-toolbox library"
   :url ""
   :license {:name "Eclipse Public License"

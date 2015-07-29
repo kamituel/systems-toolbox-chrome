@@ -21,13 +21,13 @@
 
 (defn start-recording
   []
-  (.eval (chrome/inspected-window) "clj_web_client_console.devtools.start_recording();"
+  (.eval (chrome/inspected-window) "kamituel.s_tlbx_probe.probe.start_recording();"
          (fn [response is-exception?]
            (prn "Start recording error?" is-exception?))))
 
 (defn read-from-app
   [{:keys [put-fn]}]
-  (let [eval-js "clj_web_client_console.devtools.read_recordings();"
+  (let [eval-js "kamituel.s_tlbx_probe.probe.read_recordings();"
         handle-response (fn [response err]
                           (let [{:keys [messages state-snapshots]}
                                 (decode-js-keywords (js->clj response :keywordize-keys true))]
