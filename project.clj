@@ -7,6 +7,7 @@
                  [matthiasn/systems-toolbox "0.2.17"]
                  [org.clojure/clojurescript "0.0-3308"]]
   :plugins [[lein-cljsbuild "1.0.6"]]
+  :clean-targets ^{:protect false} ["resources/devtools/js/"]
   :cljsbuild {:builds {:devtools {:source-paths ["src/devtools/cljs"]
                                   :compiler {:asset-path "js"
                                              :optimizations :simple
