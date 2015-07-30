@@ -1,14 +1,27 @@
 (ns kamituel.s-tlbx-chrome.messages
   "Table with messages as intercepted from the current tab."
-  (:require [matthiasn.systems-toolbox.reagent :as r]))
+  (:require [matthiasn.systems-toolbox.reagent :as r]
+            [reagent.core :as reagent]))
 
+(defonce container-dom-id "messages")
 
-(defn trim-long-msg
-  [msg]
-  (subs msg 0 100))
+(defn by-id
+  [id]
+  (.getElementById js/document id))
+
+(defn is-element-scrolled-down?
+  "Returns true if element that scrolls (i.e. div with overflow) is scrolled all way down
+  to the bottom."
+  [el]
+  (prn (.-scrollTop el) (.-scrollHeight el) (.-offsetHeight el))
+  (= (.-scrollTop el) (- (.-scrollHeight el) (.-offsetHeight el))))
+
+(defn scroll-to-the-bottom
+  "Scrolls element all the way down to the bottom."
+  [el]
+  (set! (.-scrollTop el) (- (.-scrollHeight el) (.-offsetHeight el))))
 
 (defn view-fn
-  ;; #^{:component-did-mount #(prn "@!!!!!!!!!!!!")}
   [{:keys [observed local cmd]}]
   (let [messages (:messages @observed)
         last-ts (-> messages last :msg-meta :s-tlbx-probe/probe :in-timestamp)]
@@ -29,8 +42,22 @@
          [:td (str dest-cmp)]
          [:td (str (-> msg-payload :msg first))]])]))
 
+(def reagent-component
+  (reagent/create-class
+    {:component-will-update
+     (fn [a [b {:keys [observed local put-fn cmd]}]]
+       (prn a)
+       (set! (.-a js/window) a)
+       (set! (.-b js/window) b)
+       (swap! local assoc :scrolled-to-the-bottom (is-element-scrolled-down? (by-id "messages"))))
+     :component-did-update
+     (fn [_ [_ {:keys [observed local put-fn cmd]}]]
+       (if (:scrolled-to-the-bottom @local)
+         (scroll-to-the-bottom (by-id "messages"))))
+     :reagent-render view-fn}))
+
 (defn component
   [cmp-id]
   (r/component {:cmp-id      cmp-id
-                :view-fn     view-fn
-                :dom-id      "messages"}))
+                :view-fn     reagent-component
+                :dom-id      container-dom-id}))

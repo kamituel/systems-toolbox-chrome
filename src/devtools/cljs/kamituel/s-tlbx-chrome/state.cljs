@@ -28,6 +28,7 @@
         cmp-id #(-> % :msg-payload :cmp-id)
         recieved-matches-sent? (fn [sent-msg]
                                  (fn [received-msg]
+                                   (prn "sent" sent-msg "received" received-msg)
                                    (and (< -5 (- (ts sent-msg) (ts received-msg)) 5)
                                         (= (msg sent-msg) (msg received-msg)))))]
     (map (fn [sent-message]

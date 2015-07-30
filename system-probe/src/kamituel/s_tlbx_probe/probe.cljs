@@ -3,7 +3,8 @@
   and messages and exposes those to the Chrome DevTools extension."
   (:require [matthiasn.systems-toolbox.component :as comp]
             [matthiasn.systems-toolbox.switchboard :as sb]
-            [clojure.walk :refer [postwalk]]))
+            [clojure.walk :refer [postwalk]]
+            [cljs.pprint :as pprint]))
 
 
 (defonce state (atom {:recording? false
@@ -36,6 +37,10 @@
 
 (defn handle-message
   [arg]
+  (prn "msg" (keys arg))
+  (prn "meta" (keys (:msg-meta arg)))
+  (prn "payload" (keys (:msg-payload arg)))
+  (pprint/pprint arg)
   (when (:recording? @state)
     (swap! state update-in [:messages] conj (select-keys arg [:msg-meta :msg-type :msg-payload]))))
 
