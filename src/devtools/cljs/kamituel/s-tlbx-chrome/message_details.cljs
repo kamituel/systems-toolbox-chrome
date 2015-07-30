@@ -51,7 +51,7 @@
 (defn view-fn
   [{:keys [observed local cmd]}]
   (let [{:keys [msg-meta msg-payload dest-cmp] :as msg} (:selected-message @observed)
-        ts (-> msg-meta :frntnd/dev-tools :in-timestamp)]
+        ts (-> msg-meta :s-tlbx-probe/probe :in-timestamp)]
     (if msg
       [:div
        (filtered-label-value {:filterable? true :local local :filter-id :src-cmp :label "Source"

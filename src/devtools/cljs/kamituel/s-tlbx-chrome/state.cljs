@@ -23,7 +23,7 @@
   [messages]
   (let [sent (filter #(= :firehose/cmp-put (:msg-type %)) messages)
         received (filter #(= :firehose/cmp-recv (:msg-type %)) messages)
-        ts #(-> % :msg-meta :frntnd/dev-tools :in-timestamp)
+        ts #(-> % :msg-meta :s-tlbx-probe/probe :in-timestamp)
         msg #(-> % :msg-payload :msg)
         cmp-id #(-> % :msg-payload :cmp-id)
         recieved-matches-sent? (fn [sent-msg]

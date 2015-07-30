@@ -11,7 +11,6 @@
   (postwalk (fn [form]
               (if (or (keyword? form) (string? form))
                 (let [[k k-ns k-name] (s/split (if (keyword? form) (name form) form) #"---")]
-                  ; (prn "split" k k-ns k-name)
                   (if (= "keyword" k)
                     (if k-name
                       (keyword k-ns k-name)
@@ -38,7 +37,6 @@
 (defn mk-state
   [put-fn]
   (let [state (atom {})]
-    ;(init-background-page put-fn)
     (start-recording)
     state))
 

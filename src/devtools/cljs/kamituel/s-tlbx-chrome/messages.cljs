@@ -11,7 +11,7 @@
   ;; #^{:component-did-mount #(prn "@!!!!!!!!!!!!")}
   [{:keys [observed local cmd]}]
   (let [messages (:messages @observed)
-        last-ts (-> messages last :msg-meta :frntnd/dev-tools :in-timestamp)]
+        last-ts (-> messages last :msg-meta :s-tlbx-probe/probe :in-timestamp)]
     [:table
      [:tr
        [:th.msg-count "#"]
@@ -24,7 +24,7 @@
         ^{:key guid}
         [:tr {:on-click (cmd :cmd/message-details msg)}
          [:td idx]
-         [:td (/ (- (-> msg-meta :frntnd/dev-tools :in-timestamp) last-ts) 1000)]
+         [:td (/ (- (-> msg-meta :s-tlbx-probe/probe :in-timestamp) last-ts) 1000)]
          [:td (str (:cmp-id msg-payload))]
          [:td (str dest-cmp)]
          [:td (str (-> msg-payload :msg first))]])]))
