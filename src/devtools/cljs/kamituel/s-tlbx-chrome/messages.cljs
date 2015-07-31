@@ -1,7 +1,6 @@
 (ns kamituel.s-tlbx-chrome.messages
   "Table with messages as intercepted from the current tab."
-  (:require [matthiasn.systems-toolbox.reagent :as r]
-            [reagent.core :as reagent]))
+  (:require [matthiasn.systems-toolbox.reagent :as r]))
 
 (defonce container-dom-id "messages")
 
@@ -13,7 +12,6 @@
   "Returns true if element that scrolls (i.e. div with overflow) is scrolled all way down
   to the bottom."
   [el]
-  (prn (.-scrollTop el) (.-scrollHeight el) (.-offsetHeight el))
   (= (.-scrollTop el) (- (.-scrollHeight el) (.-offsetHeight el))))
 
 (defn scroll-to-the-bottom
@@ -21,43 +19,43 @@
   [el]
   (set! (.-scrollTop el) (- (.-scrollHeight el) (.-offsetHeight el))))
 
+(defn save-scroll-status
+  "Before component re-renders, stores a flag whether messages window was scrolled to the bottom."
+  [_ [_ {:keys [local]}]]
+  (swap! local assoc :scrolled-to-the-bottom (is-element-scrolled-down? (by-id "messages"))))
+
+(defn scroll-if-needed
+  "If a flag is set, scrolls to the bottom."
+  [_ [_ {:keys [local]}]]
+  (if (:scrolled-to-the-bottom @local)
+         (scroll-to-the-bottom (by-id "messages"))))
+
 (defn view-fn
   [{:keys [observed local cmd]}]
-  (let [messages (:messages @observed)
-        last-ts (-> messages last :msg-meta :s-tlbx-probe/probe :in-timestamp)]
+  (let [{:keys [messages selected-message]} @observed
+        oldest-ts (-> messages last :ts)]
     [:table
      [:tr
        [:th.msg-count "#"]
        [:th.msg-timestamp "Timestamp [s]"]
-       [:th.msg-from-component "From component"]
-       [:th.msg-to-component "To component"]
+       [:th.msg-from-component "Source"]
+       [:th.msg-to-component "Destination"]
        [:th.msg-command "Command"]]
-      (for [{:keys [idx guid msg-meta msg-payload dest-cmp] :as msg}
+      (for [{:keys [idx guid src-cmp dst-cmp command ts corr-id] :as msg}
             (map-indexed (fn [idx msg] (assoc msg :idx idx)) (reverse messages))]
-        ^{:key guid}
-        [:tr {:on-click (cmd :cmd/message-details msg)}
+        ^{:key corr-id}
+        [:tr (merge {:on-click (cmd :cmd/message-details msg)}
+                    (when (= (:corr-id selected-message) (:corr-id msg)) {:class :selected}))
          [:td idx]
-         [:td (/ (- (-> msg-meta :s-tlbx-probe/probe :in-timestamp) last-ts) 1000)]
-         [:td (str (:cmp-id msg-payload))]
-         [:td (str dest-cmp)]
-         [:td (str (-> msg-payload :msg first))]])]))
-
-(def reagent-component
-  (reagent/create-class
-    {:component-will-update
-     (fn [a [b {:keys [observed local put-fn cmd]}]]
-       (prn a)
-       (set! (.-a js/window) a)
-       (set! (.-b js/window) b)
-       (swap! local assoc :scrolled-to-the-bottom (is-element-scrolled-down? (by-id "messages"))))
-     :component-did-update
-     (fn [_ [_ {:keys [observed local put-fn cmd]}]]
-       (if (:scrolled-to-the-bottom @local)
-         (scroll-to-the-bottom (by-id "messages"))))
-     :reagent-render view-fn}))
+         [:td (/ (- ts oldest-ts) 1000)]
+         [:td (str src-cmp)]
+         [:td (str dst-cmp)]
+         [:td (str command)]])]))
 
 (defn component
   [cmp-id]
   (r/component {:cmp-id      cmp-id
-                :view-fn     reagent-component
-                :dom-id      container-dom-id}))
+                :view-fn     view-fn
+                :dom-id      container-dom-id
+                :lifecycle-callbacks {:component-will-update save-scroll-status
+                                      :component-did-update scroll-if-needed}}))

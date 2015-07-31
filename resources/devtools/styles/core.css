@@ -1,0 +1,483 @@
+@font-face {
+  font-family: source-code;
+  src: url('../fonts/SourceCodePro-Light.otf.woff2') format('woff2');
+}
+body {
+  padding: 0;
+  margin: 0;
+  background-color: #222;
+  color: white;
+  font-family: source-code;
+}
+#container {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+#messages,
+#state-snapshots {
+  padding: 0px 15px 0px 15px;
+  margin-left: 30px;
+  display: none;
+  height: 100%;
+  overflow-y: scroll;
+}
+#messages {
+  margin-right: 35%;
+}
+#state-snapshots {
+  height: 100%;
+  margin-right: 35px;
+  position: relative;
+}
+body[view='messages'] #messages {
+  display: block;
+}
+body[view='state-snapshots'] #state-snapshots {
+  display: block;
+}
+body[view='state-snapshots'] #sidebar {
+  display: none;
+}
+#toolbox {
+  width: 30px;
+  background-color: white;
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  text-align: center;
+}
+#toolbox,
+#sidebar {
+  box-shadow: 0px 0px 20px black;
+}
+table {
+  border-collapse: collapse;
+  width: 100%;
+}
+table tr:first-child {
+  border-bottom: 1px dashed #ccc;
+}
+table td,
+table th {
+  text-align: left;
+  vertical-align: top;
+  font-size: 12px;
+}
+table th {
+  font-weight: bold;
+}
+table td {
+  padding: 0;
+}
+#messages table {
+  margin-bottom: 15px;
+}
+#messages table {
+  margin-bottom: 15px;
+}
+#messages table td:empty {
+  background-color: #dd2222;
+}
+#messages table th.msg-count {
+  min-width: 50px;
+  max-width: 50px;
+}
+#messages table th.msg-timestamp {
+  min-width: 110px;
+  max-width: 110px;
+}
+#messages table th.msg-from-component {
+  min-width: 170px;
+  max-width: 170px;
+}
+#messages table th.msg-to-component {
+  min-width: 170px;
+  max-width: 170px;
+}
+#messages table th.msg-command {
+  min-width: 170px;
+  width: 100%;
+}
+#messages table tr:hover,
+#messages table tr.selected {
+  background-color: #111;
+  cursor: pointer;
+}
+#sidebar {
+  width: 35%;
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  right: 0;
+  background-color: white;
+  color: #333;
+  padding: 0px;
+  overflow: scroll;
+}
+#sidebar > div > div > h2 {
+  width: 100%;
+  height: 20px;
+  background-color: #222;
+  color: white;
+  font-weight: normal;
+  font-size: 12px;
+  padding: 0;
+  margin: 0;
+  text-transform: uppercase;
+  padding-left: 5px;
+  line-height: 20px;
+}
+#sidebar > div > div > h2 span[class*="icon-"] {
+  float: right;
+  display: inline-block;
+  color: white;
+  font-size: 16px;
+  margin-right: 10px;
+  margin-top: 1px;
+}
+#sidebar > div > div > div {
+  padding: 5px 5px 10px 5px;
+  font-size: 14px;
+}
+.value {
+  height: 16px;
+}
+.value h3 {
+  float: left;
+  font-family: sans-serif;
+  font-weight: bold;
+  font-size: 13px;
+  width: 110px;
+  margin: 0;
+}
+.value span {
+  display: inline-block;
+  margin-top: -1px;
+}
+#sidebar .filters {
+  margin-top: 5px;
+  margin-left: 28px;
+}
+#sidebar .filters button {
+  margin-right: 5px;
+}
+#toolbox #components {
+  background-color: #333;
+  width: 30px;
+  padding-bottom: 10px;
+}
+#components button,
+#tools button {
+  border: none;
+  width: 20px;
+  height: 20px;
+  background: none;
+  cursor: pointer;
+  margin-top: 10px;
+  -webkit-transition: all 0.1s ease-in;
+  outline: none;
+  padding: 0;
+  font-size: 14px;
+}
+#tools button {
+  color: black;
+}
+#tools button:hover {
+  color: #999;
+}
+#components button {
+  color: #888;
+}
+#components button:hover,
+#components button.selected {
+  color: white;
+}
+#state-snapshots ul.tabs {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+  margin-top: 10px;
+}
+#state-snapshots ul.tabs li {
+  display: inline-block;
+  height: 12px;
+  font-size: 11px;
+  padding: 2px 8px 3px 8px;
+  border: 1px dashed white;
+  cursor: pointer;
+  -webkit-transition: all 0.15s ease-in;
+}
+#state-snapshots ul.tabs li:hover,
+#state-snapshots ul.tabs li.selected {
+  background-color: white;
+  color: black;
+}
+#filters {
+  color: black;
+}
+#filters table {
+  color: black;
+}
+#filters table th.type {
+  width: 25px;
+}
+#filters table th.src {
+  width: 30%;
+}
+#filters table th.dst {
+  width: 30%;
+}
+#filters table th.cmd {
+  width: 30%;
+}
+#filters table th.action {
+  width: 25px;
+}
+#filters table td span[class*="icon-"] {
+  font-size: 16px;
+}
+#filters table td.remove span {
+  cursor: pointer;
+}
+#filters table td.remove span:hover {
+  color: #dd3333;
+}
+#filters table td.single-col {
+  padding: 5px 25px 5px 25px;
+}
+#filters table tfoot td .toggle-button {
+  width: 50px;
+  height: 16px;
+  color: white;
+  padding: 0;
+  font-size: 12px;
+  margin-left: 0;
+}
+#filters table tfoot td .toggle-button:before {
+  background-color: #cc2222;
+}
+#filters table tfoot td .toggle-button:after {
+  background-color: #22aa55;
+}
+#filters table tfoot td .toggle-text {
+  font-size: 12px;
+  display: block;
+  padding-left: 50px;
+  height: 18px;
+}
+#filters table tfoot td .toggle-text[data-state="off"] {
+  color: #888;
+}
+#filters table tfoot td .toggle-text[data-state="on"] {
+  color: #22aa55;
+}
+#filters table tfoot td span[class*="icon-"] {
+  float: right;
+  margin-top: -14px;
+}
+span[class*="icon-"].warn {
+  color: #dd2222;
+}
+span[class*="icon-"].confirm {
+  color: #22cc22;
+}
+/* Colors */
+.edn-tree .map:before,
+.edn-tree .map:after {
+  color: #eeee22;
+}
+.edn-tree .vector:before,
+.edn-tree .vector:after {
+  color: #22ee22;
+}
+.edn-tree .seq:before,
+.edn-tree .seq:after {
+  color: purple;
+}
+.edn-tree .string {
+  color: #33ffff;
+}
+.edn-tree .number {
+  color: #cc66ff;
+}
+.edn-tree .keyword {
+  color: #ff8888;
+}
+.edn-tree .nil {
+  color: red;
+}
+.edn-tree .boolean {
+  color: #ff00ff;
+}
+.edn-tree.light .map:before,
+.edn-tree.light .map:after {
+  color: #555500;
+}
+.edn-tree.light .vector:before,
+.edn-tree.light .vector:after {
+  color: #228822;
+}
+.edn-tree.light .seq:before,
+.edn-tree.light .seq:after {
+  color: purple;
+}
+.edn-tree.light .string {
+  color: #339999;
+}
+.edn-tree.light .number {
+  color: #7700aa;
+}
+.edn-tree.light .keyword {
+  color: #770000;
+}
+.edn-tree.light .nil {
+  color: red;
+}
+.edn-tree.light .boolean {
+  color: #990099;
+}
+/* Layout */
+.edn-tree {
+  font-size: 13px;
+  width: 100000px;
+  margin-top: 20px;
+  display: flex;
+}
+.edn-tree .map {
+  display: block;
+  float: left;
+}
+.edn-tree .map .key-val {
+  display: block;
+  float: left;
+  /* Map key */
+  /* Map value */
+}
+.edn-tree .map .key-val:not(:first-child) {
+  display: block;
+  clear: both;
+  padding-left: 10px;
+}
+.edn-tree .map .key-val > div:nth-child(1) {
+  display: block;
+  float: left;
+  padding: 0 5px 0 5px;
+}
+.edn-tree .map .key-val > div:nth-child(2) {
+  display: inline-block;
+}
+.edn-tree .map:before {
+  content: "{";
+}
+.edn-tree .map:after {
+  content: "}";
+}
+.edn-tree .map:before,
+.edn-tree .map:after {
+  display: inline-flex;
+  float: left;
+}
+.edn-tree .vector > div {
+  display: inline-flex;
+  float: left;
+  clear: both;
+}
+.edn-tree .vector:before {
+  content: "[";
+}
+.edn-tree .vector:after {
+  content: "]";
+}
+.edn-tree .vector:before,
+.edn-tree .vector:after {
+  display: inline-flex;
+  float: left;
+}
+.edn-tree .seq:before {
+  content: "(";
+}
+.edn-tree .seq:after {
+  content: ")";
+}
+.edn-tree .seq:before,
+.edn-tree .seq:after {
+  display: inline-flex;
+  float: left;
+}
+.edn-tree span.string:before,
+.edn-tree span.string:after {
+  content: "\"";
+}
+.edn-tree .collapsed {
+  cursor: pointer;
+}
+.edn-tree .collapsed > .vector:before {
+  content: "[...";
+}
+.edn-tree .collapsed > .map:before {
+  content: "{...";
+}
+.edn-tree .collapsed > .seq:before {
+  content: "(...";
+}
+.edn-tree .collapsed:hover > .vector:before,
+.edn-tree .collapsed:hover > .vector:after,
+.edn-tree .collapsed:hover > .map:before,
+.edn-tree .collapsed:hover > .map:before,
+.edn-tree .collapsed:hover > .seq:before,
+.edn-tree .collapsed:hover > .seq:before {
+  text-decoration: underline;
+}
+.toggle-button {
+  height: 25px;
+  width: 300px;
+  position: relative;
+  overflow: hidden;
+  cursor: pointer;
+  display: inline-block;
+}
+.toggle-button:before,
+.toggle-button:after {
+  display: inline-block;
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  transition: all 0.2s ease;
+  text-align: center;
+}
+.toggle-button:before {
+  background-color: red;
+  content: attr(data-off);
+  left: 0%;
+}
+.toggle-button:after {
+  background-color: green;
+  content: attr(data-on);
+  left: 100%;
+}
+.toggle-button[data-state="on"]:before {
+  left: -100%;
+}
+.toggle-button[data-state="on"]:after {
+  left: 0%;
+}
+.toggle-text {
+  display: inline;
+  padding: 0;
+  margin: 0;
+  font-weight: bold;
+  cursor: pointer;
+}
+.toggle-text[data-state="off"] {
+  text-decoration: line-through;
+}
+.toggle-button,
+.toggle-text {
+  -webkit-user-select: none;
+}
+.toggle-button.inline,
+.toggle-text.inline {
+  margin: 0 4px -4px 4px;
+}

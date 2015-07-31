@@ -23,3 +23,4 @@ pom.xml.asc
 .hg/
 .DS_Store
 resources/devtools/js
+dev-tools/node_modules/

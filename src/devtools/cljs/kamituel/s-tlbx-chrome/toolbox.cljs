@@ -9,13 +9,17 @@
 
 (defn view-fn
   [{:keys [observed local cmd]}]
-  (let []
+  (let [view (:view @observed)]
     [:div
      [:div#components
-      (component-button cmd (:view @observed) [:span.icon-mail-alt] :cmp/messages)
-      (component-button cmd (:view @observed) [:span.icon-camera] :cmp/state-snapshots)]
+      (component-button cmd view [:span.icon-mail-alt] :cmp/messages)
+      (component-button cmd view [:span.icon-camera] :cmp/state-snapshots)]
      [:div#tools
-      [:button {:on-click (cmd :cmd/clear-messages)} [:span.icon-cancel-circled]]]]))
+      (when (= :cmp/messages view)
+        [:button {:on-click (cmd :cmd/clear-messages)} [:span.icon-cancel-circled]])
+      (when (= :cmp/state-snapshots view)
+        [:button {:on-click (cmd :cmd/clear-state-snapshots)} [:span.icon-cancel-circled]])
+      [:button {:on-click (cmd :cmd/reset)} [:span.icon-attention.warn]]]]))
 
 (defn component
   [cmp-id]

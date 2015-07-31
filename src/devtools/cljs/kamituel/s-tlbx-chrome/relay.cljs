@@ -10,35 +10,29 @@
   [data]
   (postwalk (fn [form]
               (if (or (keyword? form) (string? form))
-                (let [[k k-ns k-name] (s/split (if (keyword? form) (name form) form) #"---")]
+                (let [form-name (if (keyword? form) (subs (str form) 1) form)
+                      [k k-ns k-name] (s/split form-name #"---")]
                   (if (= "keyword" k)
-                    (if k-name
-                      (keyword k-ns k-name)
-                      (keyword k-ns))
+                    (keyword (if (empty? k-ns) nil k-ns) k-name)
                     form))
                 form)) data))
 
-(defn start-recording
-  []
-  (.eval (chrome/inspected-window) "kamituel.s_tlbx_probe.probe.start_recording();"
-         (fn [response is-exception?]
-           (prn "Start recording error?" is-exception?))))
+(defn probe-ipc
+  [method-name callback]
+  (.eval (chrome/inspected-window) (str "kamituel.s_tlbx_probe.probe." method-name "();") callback))
 
 (defn read-from-app
   [{:keys [put-fn]}]
-  (let [eval-js "kamituel.s_tlbx_probe.probe.read_recordings();"
-        handle-response (fn [response err]
+  (let [handle-response (fn [response err]
                           (let [{:keys [messages state-snapshots]}
-                                (decode-js-keywords (js->clj response :keywordize-keys true))]
+                                (decode-js-keywords (js->clj response :keywordize-keys false))]
                             (put-fn [:cmd/new-messages messages])
                             (put-fn [:cmd/new-state-snapshots state-snapshots])))]
-    (.eval (chrome/inspected-window) eval-js handle-response)))
+    (probe-ipc "read_recordings" handle-response)))
 
 (defn mk-state
   [put-fn]
-  (let [state (atom {})]
-    (start-recording)
-    state))
+  (atom {}))
 
 (defn component
   [cmp-id]

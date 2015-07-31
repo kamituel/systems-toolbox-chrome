@@ -9,27 +9,46 @@
 
 (defonce state (atom {:recording? false
                       :messages '()
-                      :state-snapshots '()}))
+                      :state-snapshots '()
+                      ;; DevTools extension is expected to read recordings from this probe every
+                      ;; second. A timeout of 10 seconds is set up after each reading to stop
+                      ;; recording in case extension has been closed. This is to prevent
+                      ;; accumulating many messages / state snapshots in this atom which could clog
+                      ;; the memory and make target application unresponsive.
+                      :readout-timeout 10000
+                      :readout-timeout-id nil}))
 
 (defn encode-js-keywords
-  "clj->js strips the namespace part from the keywords. This fn replaces :a/b with \"a__b\""
+  "clj->js strips the namespace part from the keywords. This fn replaces :a/b with \"a__b\"
+  so it can be recovered on the other end."
   [data]
   (postwalk (fn [form]
-              (if (and (keyword? form)
-                       (namespace form))
+              (if (keyword? form)
                 (str "keyword---" (namespace form) "---" (name form))
                 form)) data))
 
-(defn ^:export start-recording
+(defn stop-recording
   []
-  (swap! state assoc :recording? true))
-
-(defn ^:export stop-recording
-  []
+  (prn "Toolbox DevTools recording stopped because of a timeout.")
   (swap! state assoc :recording? false))
+
+(defn refresh-timeout
+  []
+  (let [timeout-id (.setTimeout js/window stop-recording (:readout-timeout @state))
+        previous-timeout-id (:readout-timeout-id @state)]
+    (when previous-timeout-id (.clearTimeout js/window previous-timeout-id))
+    (swap! state assoc :readout-timeout-id timeout-id)))
+
+(defn start-recording
+  []
+  (refresh-timeout)
+  (when (not (:recording? @state))
+    (prn "Toolbox DevTools recording started/resumed.")
+    (swap! state assoc :recording? true)))
 
 (defn ^:export read-recordings
   [n]
+  (start-recording)
   (let [recordings (select-keys @state [:messages :state-snapshots])]
     (swap! state assoc :messages '())
     (swap! state assoc :state-snapshots '())
@@ -37,10 +56,6 @@
 
 (defn handle-message
   [arg]
-  (prn "msg" (keys arg))
-  (prn "meta" (keys (:msg-meta arg)))
-  (prn "payload" (keys (:msg-payload arg)))
-  (pprint/pprint arg)
   (when (:recording? @state)
     (swap! state update-in [:messages] conj (select-keys arg [:msg-meta :msg-type :msg-payload]))))
 

@@ -9,10 +9,3 @@
 
 ;; True if running as a Chrome DevTools extension.
 (def in-chrome? (not (nil? devtools)))
-
-(defn create-sidebar-with-data
-  [title data]
-  (.createSidebarPane (.. devtools -panels -elements) title
-                      (fn [sidebar]
-                        (prn "sidebar created")
-                        (.setObject sidebar data "sometitle" (fn [a b c] (prn "object set" a b c))))))
