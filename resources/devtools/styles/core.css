@@ -15,7 +15,8 @@ body {
   height: 100%;
 }
 #messages,
-#state-snapshots {
+#state-snapshots,
+#probe-error {
   padding: 0px 15px 0px 15px;
   margin-left: 30px;
   display: none;
@@ -37,6 +38,16 @@ body[view='state-snapshots'] #state-snapshots {
   display: block;
 }
 body[view='state-snapshots'] #sidebar {
+  display: none;
+}
+body[view='probe-error'] #probe-error {
+  display: block;
+  padding-top: 20px;
+}
+body[view='probe-error'] #probe-error a {
+  color: white;
+}
+body[view='probe-error'] #container {
   display: none;
 }
 #toolbox {

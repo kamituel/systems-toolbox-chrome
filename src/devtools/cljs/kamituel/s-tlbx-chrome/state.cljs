@@ -1,13 +1,17 @@
 (ns kamituel.s-tlbx-chrome.state
   (:require [kamituel.s-tlbx-chrome.utils :as u]
-            [matthiasn.systems-toolbox.component :as comp]))
+            [matthiasn.systems-toolbox.component :as comp]
+            [alandipert.storage-atom :refer [local-storage]]))
 
+;; A copy used only to persist message filters so they're there when dev tool is re-opened.
+(defonce message-filters
+  (local-storage (atom #{}) :message-filters))
 
 (defonce initial-state
   {:messages '()
    :state-snapshots {}
    :selected-message nil
-   :message-filters #{}
+   :message-filters @message-filters
    :view :messages})
 
 (defn correlate-sender-with-receiver
@@ -71,13 +75,15 @@
   "Filters message fiter."
   [{:keys [cmp-state msg-payload]}]
   (swap! cmp-state update-in [:message-filters] conj msg-payload)
+  (swap! message-filters conj msg-payload)
   (swap! cmp-state update-in [:messages] (partial apply-message-filters cmp-state)))
 
 (defn remove-message-filter
   "Removes message filter. Since we're not keeping messages that do not match filters,
   only messages that will be captured after filter gets removed will be displayed."
   [{:keys [cmp-state msg-payload]}]
-  (swap! cmp-state update-in [:message-filters] disj msg-payload))
+  (swap! cmp-state update-in [:message-filters] disj msg-payload)
+  (swap! message-filters disj msg-payload))
 
 (defn clear-messages
   "Clears the list of messages."
@@ -118,6 +124,10 @@
         older-msg (second (drop-while #(not (u/msg-eq selected-message %)) messages))]
     (swap! cmp-state assoc :selected-message older-msg)))
 
+(defn handle-probe-error
+  [{:keys [cmp-state]}]
+  (show-component {:cmp-state cmp-state :msg-payload :probe-error}))
+
 (defn mk-state
   [put-fn]
   (atom initial-state))
@@ -126,7 +136,8 @@
   [cmp-id]
   (comp/make-component {:cmp-id      cmp-id
                         :state-fn    mk-state
-                        :handler-map {:cmd/new-messages          handle-new-messages
+                        :handler-map {:cmd/probe-error           handle-probe-error
+                                      :cmd/new-messages          handle-new-messages
                                       :cmd/new-state-snapshots   handle-new-state-snapshots
                                       :cmd/message-details       show-message-details
                                       :cmd/add-message-filter    add-message-filter

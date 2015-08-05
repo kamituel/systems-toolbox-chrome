@@ -3,7 +3,7 @@
     <link rel="stylesheet" href="./styles/core.css">
     <link rel="stylesheet" href="./styles/symbol-font.css">
   </head>
-  <body view="state-snapshots">
+  <body>
     <div id="container">
       <div id="toolbox">
         <div id="components"></div>
@@ -15,6 +15,15 @@
         <div id="filters"></div>
         <div id="message-details"></div>
       </div>
+    </div>
+    <div id="probe-error">
+      <h2>Could not talk to a probe.</h2>
+      <p>One of the following happened:</p>
+      <ul>
+        <li>Web app in the current tab isn't <a target="_blank" href="https://github.com/matthiasn/systems-toolbox">a systems-toolbox app</a>.</li>
+        <li>Probe is not planted in this app. <a target="_blank" href="https://github.com/kamituel/systems-toolbox-chrome">Follow this guide to do so</a>.</li>
+        <li>This extension is broken. Try to debug it and <a target="_blank" href="https://github.com/kamituel/systems-toolbox-chrome/issues">file an issue here</a>.</li>
+      </ul>
     </div>
     <script src="js/all.js"></script>
   </body>

@@ -23,12 +23,15 @@
 
 (defn read-from-app
   [{:keys [put-fn]}]
-  (let [handle-response (fn [response err]
-                          (let [{:keys [messages state-snapshots]}
-                                (decode-js-keywords (js->clj response :keywordize-keys false))]
-                            (put-fn [:cmd/new-messages messages])
-                            (put-fn [:cmd/new-state-snapshots state-snapshots])))]
-    (probe-ipc "read_recordings" handle-response)))
+  (probe-ipc
+    "read_recordings"
+    (fn [response err]
+      (if err
+        (put-fn [:cmd/probe-error]))
+      (let [{:keys [messages state-snapshots]}
+            (decode-js-keywords (js->clj response :keywordize-keys false))]
+        (put-fn [:cmd/new-messages messages])
+        (put-fn [:cmd/new-state-snapshots state-snapshots])))))
 
 (defn mk-state
   [put-fn]
