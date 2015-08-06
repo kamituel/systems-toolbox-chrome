@@ -25,7 +25,8 @@
              :meta    (-> msg :msg-payload :msg-meta)
              :ts      (-> msg :msg-meta :s-tlbx-probe/probe :in-ts)
              :type    (-> msg :msg-type)
-             :corr-id (get-in msg [:msg-payload :msg-meta :corr-id "uuid"])}
+             :corr-id (get-in msg [:msg-payload :msg-meta :corr-id "uuid"])
+             :tag     (get-in msg [:msg-payload :msg-meta :tag "uuid"])}
             (= :stringify-keywords opt) (update-in [:src-cmp] (partial str))
             (= :stringify-keywords opt) (update-in [:dst-cmp] (partial str))
             (= :stringify-keywords opt) (update-in [:command] (partial str))))))

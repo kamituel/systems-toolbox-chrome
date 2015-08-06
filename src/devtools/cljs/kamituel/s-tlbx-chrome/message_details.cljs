@@ -25,12 +25,12 @@
        [:div.value [:h3 "Timestamp"] [:span ts-time]]
        [:div.value [:h3 "Tag"] [:span tag]]
        [:div.value [:h3 "Correlation UUID"] [:span corr-id]]
-       [:div.value [:h3 "Message body"]]
+       [:div.value.block [:h3 "Message body"]]
        [:div.edn-tree.light (u/data->hiccup payload (:expanded-body @local)
                                             (fn [path]
                                               (fn [_]
                                                 (swap! local assoc :expanded-body path))))]
-       [:div.value [:h3 "Message meta"]]
+       [:div.value.block [:h3 "Message meta"]]
        [:div.edn-tree.light (u/data->hiccup meta (:expanded-meta @local)
                                             (fn [path]
                                               (fn [_]
