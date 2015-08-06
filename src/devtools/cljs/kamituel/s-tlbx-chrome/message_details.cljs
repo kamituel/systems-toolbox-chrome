@@ -12,7 +12,7 @@
 
 (defn view-fn
   [{:keys [observed local cmd]}]
-  (let [{:keys [src-cmp dst-cmp command ts-time payload corr-id] :as msg}
+  (let [{:keys [src-cmp dst-cmp command ts-time payload meta corr-id tag] :as msg}
         (-> @observed :selected-message u/msg-printable)]
     [:div
      [:h2 "Message details"]
@@ -23,11 +23,18 @@
        [:div.value [:h3 "Destination"] [:span dst-cmp]]
        [:div.value [:h3 "Command"] [:span command]]
        [:div.value [:h3 "Timestamp"] [:span ts-time]]
+       [:div.value [:h3 "Tag"] [:span tag]]
        [:div.value [:h3 "Correlation UUID"] [:span corr-id]]
-       [:div.edn-tree.light (u/data->hiccup payload (:expanded @local)
+       [:div.value [:h3 "Message body"]]
+       [:div.edn-tree.light (u/data->hiccup payload (:expanded-body @local)
                                             (fn [path]
                                               (fn [_]
-                                                (swap! local assoc :expanded path))))]]
+                                                (swap! local assoc :expanded-body path))))]
+       [:div.value [:h3 "Message meta"]]
+       [:div.edn-tree.light (u/data->hiccup meta (:expanded-meta @local)
+                                            (fn [path]
+                                              (fn [_]
+                                                (swap! local assoc :expanded-meta path))))]]
       [:div "No message selected."])]]))
 
 (defn component

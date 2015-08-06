@@ -22,6 +22,7 @@
              :dst-cmp (-> msg :dest-cmp)
              :command (-> msg :msg-payload :msg first)
              :payload (-> msg :msg-payload :msg second)
+             :meta    (-> msg :msg-payload :msg-meta)
              :ts      (-> msg :msg-meta :s-tlbx-probe/probe :in-ts)
              :type    (-> msg :msg-type)
              :corr-id (get-in msg [:msg-payload :msg-meta :corr-id "uuid"])}
