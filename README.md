@@ -6,7 +6,7 @@ Chrome DevTools support for [systems-toolbox library](https://github.com/matthia
 ## Installation
 
 **Step 1:**
-Clone this repository and install it locally (this is not in Clojars yet):
+Clone this repository and install it locally:
 
 ```shell
 git clone git@github.com:kamituel/systems-toolbox-chrome.git
@@ -15,7 +15,11 @@ lein install
 ```
 
 **Step 2:**
-Attach the probe to the switchboard you wish to monitor:
+Add a probe dependency:
+
+[![Clojars Project](http://clojars.org/kamituel/s-tlbx-probe/latest-version.svg)](http://clojars.org/kamituel/s-tlbx-probe)
+
+Then, attach the probe to the switchboard you wish to monitor:
 
 ```clojure
 (ns example
