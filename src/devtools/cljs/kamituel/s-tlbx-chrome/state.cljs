@@ -142,13 +142,13 @@
 (defn next-younger-message
   [{:keys [cmp-state]}]
   (let [{:keys [selected-message messages]} @cmp-state
-        younger-msg (second (drop-while #(not (u/msg-eq selected-message %)) (reverse messages)))]
+        younger-msg (second (drop-while #(not (u/msg-eq selected-message %)) messages))]
     (swap! cmp-state assoc :selected-message younger-msg)))
 
 (defn next-older-message
   [{:keys [cmp-state]}]
   (let [{:keys [selected-message messages]} @cmp-state
-        older-msg (second (drop-while #(not (u/msg-eq selected-message %)) messages))]
+        older-msg (second (drop-while #(not (u/msg-eq selected-message %)) (reverse messages)))]
     (swap! cmp-state assoc :selected-message older-msg)))
 
 (defn handle-probe-error
