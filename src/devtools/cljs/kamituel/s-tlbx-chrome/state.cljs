@@ -8,7 +8,8 @@
   (local-storage (atom {:message-limit 500
                         :message-filters #{}}) :settings))
 
-(defonce initial-state
+(defn initial-state
+  []
   {
    ;; List of messages captured. Oldest first. When messages are filtered, they are
    ;; removed/not stored here.
@@ -37,6 +38,12 @@
 (defn persist-settings
   [cmp-state]
   (reset! settings (select-keys @cmp-state persistent-settings)))
+
+(defn show-component
+  "Shows eitehr a messages, or snapshots panel."
+  [{:keys [cmp-state msg-payload]}]
+  (swap! cmp-state assoc :view msg-payload)
+  (.setAttribute (.. js/document -body) "view" (name msg-payload)))
 
 (defn correlate-sender-with-receiver
   "Matches message sent over a channel with a received one on the other and (by another component),
@@ -73,7 +80,7 @@
 (defn handle-new-messages
   "Analyzes new messages and appends them to the :messages list in a state."
   [{:keys [cmp-state msg-payload]}]
-  (let [{:keys [total-messages-count message-limit first-message-ts]} @cmp-state
+  (let [{:keys [view total-messages-count message-limit first-message-ts]} @cmp-state
         assign-message-idx (fn [total-count msgs]
                              (map-indexed #(assoc %2 :idx (+ %1 1 total-count)) msgs))
         messages (->> msg-payload
@@ -82,6 +89,7 @@
                       correlate-sender-with-receiver
                       (assign-message-idx total-messages-count))
         messages-filtered (apply-message-filters cmp-state messages)]
+   (when (= :probe-error view) (show-component {:cmp-state cmp-state :msg-payload :cmp/messages}))
    (when (zero? first-message-ts) (swap! cmp-state assoc :first-message-ts (-> messages first :ts)))
    (swap! cmp-state update-in [:total-messages-count] (partial + (count messages)))
    (swap! cmp-state update-in [:messages] (fn [msgs]
@@ -131,13 +139,7 @@
 (defn reset
   "Resets state."
   [{:keys [cmp-state]}]
-  (reset! cmp-state initial-state))
-
-(defn show-component
-  "Shows eitehr a messages, or snapshots panel."
-  [{:keys [cmp-state msg-payload]}]
-  (swap! cmp-state assoc :view msg-payload)
-  (.setAttribute (.. js/document -body) "view" (name msg-payload)))
+  (reset! cmp-state (initial-state)))
 
 (defn next-younger-message
   [{:keys [cmp-state]}]
@@ -152,7 +154,12 @@
     (swap! cmp-state assoc :selected-message older-msg)))
 
 (defn handle-probe-error
+  "Probe error can occur in various situations, i.e. no probe being present. But it can also occur
+  when user reloads the page without closing the extension first. In this case we should also clear
+  the state so the extension is empty after page is reloaded. Otherwise old messages/state snapshots
+  would be displayed even though they're not present in the app after reload."
   [{:keys [cmp-state]}]
+  (reset! cmp-state (initial-state))
   (show-component {:cmp-state cmp-state :msg-payload :probe-error}))
 
 (defn set-message-limit
@@ -162,7 +169,7 @@
 
 (defn mk-state
   [put-fn]
-  (atom initial-state))
+  (atom (initial-state)))
 
 (defn component
   [cmp-id]
