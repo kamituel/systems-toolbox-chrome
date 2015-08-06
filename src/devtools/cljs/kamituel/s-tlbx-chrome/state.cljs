@@ -4,15 +4,39 @@
             [alandipert.storage-atom :refer [local-storage]]))
 
 ;; A copy used only to persist message filters so they're there when dev tool is re-opened.
-(defonce message-filters
-  (local-storage (atom #{}) :message-filters))
+(defonce settings
+  (local-storage (atom {:message-limit 500
+                        :message-filters #{}}) :settings))
 
 (defonce initial-state
-  {:messages '()
+  {
+   ;; List of messages captured. Oldest first. When messages are filtered, they are
+   ;; removed/not stored here.
+   :messages '()
+   ;; Total number of messages captured since extension started working. Does include messages
+   ;; filtered and messages that have been removed because message-limit was reached.
+   :total-messages-count 0
+   ;; Timestamp of the first message captured. Used to display relative time of each subsequent
+   ;; message.
+   :first-message-ts 0
+   ;; Number of messages to show on the list.
+   :message-limit (:message-limit @settings)
+   ;; User is allowed to adjust :message-limit. These set the min and max value possible.
+   :message-limit-min 50
+   :message-limit-max 2000
+   ;; State snapshots. Keys are component ID's, values are the latest snapshots captured.
    :state-snapshots {}
+   ;; Currently selected message.
    :selected-message nil
-   :message-filters @message-filters
+   :message-filters (:message-filters @settings)
    :view :messages})
+
+(def persistent-settings
+  [:message-filters :message-limit])
+
+(defn persist-settings
+  [cmp-state]
+  (reset! settings (select-keys @cmp-state persistent-settings)))
 
 (defn correlate-sender-with-receiver
   "Matches message sent over a channel with a received one on the other and (by another component),
@@ -49,11 +73,20 @@
 (defn handle-new-messages
   "Analyzes new messages and appends them to the :messages list in a state."
   [{:keys [cmp-state msg-payload]}]
-  (let [messages (->> msg-payload
+  (let [{:keys [total-messages-count message-limit first-message-ts]} @cmp-state
+        assign-message-idx (fn [total-count msgs]
+                             (map-indexed #(assoc %2 :idx (+ %1 1 total-count)) msgs))
+        messages (->> msg-payload
+                      reverse
                       (map (partial u/raw-msg->map))
                       correlate-sender-with-receiver
-                      (apply-message-filters cmp-state))]
-   (swap! cmp-state update-in [:messages] #(concat messages %))))
+                      (assign-message-idx total-messages-count))
+        messages-filtered (apply-message-filters cmp-state messages)]
+   (when (zero? first-message-ts) (swap! cmp-state assoc :first-message-ts (-> messages first :ts)))
+   (swap! cmp-state update-in [:total-messages-count] (partial + (count messages)))
+   (swap! cmp-state update-in [:messages] (fn [msgs]
+                                            (->> (concat msgs messages-filtered)
+                                                 (take-last message-limit))))))
 
 (defn handle-new-state-snapshots
   "Handle new state messages. Only one state for each component is stored, rest is currently
@@ -75,15 +108,15 @@
   "Filters message fiter."
   [{:keys [cmp-state msg-payload]}]
   (swap! cmp-state update-in [:message-filters] conj msg-payload)
-  (swap! message-filters conj msg-payload)
-  (swap! cmp-state update-in [:messages] (partial apply-message-filters cmp-state)))
+  (swap! cmp-state update-in [:messages] (partial apply-message-filters cmp-state))
+  (persist-settings cmp-state))
 
 (defn remove-message-filter
   "Removes message filter. Since we're not keeping messages that do not match filters,
   only messages that will be captured after filter gets removed will be displayed."
   [{:keys [cmp-state msg-payload]}]
   (swap! cmp-state update-in [:message-filters] disj msg-payload)
-  (swap! message-filters disj msg-payload))
+  (persist-settings cmp-state))
 
 (defn clear-messages
   "Clears the list of messages."
@@ -94,12 +127,6 @@
   "Clears state snapshots."
   [{:keys [cmp-state]}]
   (swap! cmp-state assoc :state-snapshots '()))
-
-(defn clear-filters
-  "Clears filters."
-  [{:keys [cmp-state]}]
-  (swap! cmp-state assoc :filter-in [])
-  (swap! cmp-state assoc :filter-out []))
 
 (defn reset
   "Resets state."
@@ -128,6 +155,11 @@
   [{:keys [cmp-state]}]
   (show-component {:cmp-state cmp-state :msg-payload :probe-error}))
 
+(defn set-message-limit
+  [{:keys [cmp-state msg-payload]}]
+  (swap! cmp-state assoc :message-limit msg-payload)
+  (persist-settings cmp-state))
+
 (defn mk-state
   [put-fn]
   (atom initial-state))
@@ -144,8 +176,8 @@
                                       :cmd/remove-message-filter remove-message-filter
                                       :cmd/clear-messages        clear-messages
                                       :cmd/clear-state-snapshots clear-state-snapshots
-                                      :cmd/clear-filters         clear-filters
                                       :cmd/next-younger-message  next-younger-message
                                       :cmd/next-older-message    next-older-message
+                                      :cmd/set-message-limit     set-message-limit
                                       :cmd/reset                 reset
                                       :cmd/show-component        show-component}}))

@@ -15,4 +15,12 @@
                                              :optimizations :simple
                                              :output-dir "resources/devtools/js"
                                              :output-to "resources/devtools/js/all.js"
-                                             :source-map "resources/devtools/js/all.map"}}}})
+                                             :source-map "resources/devtools/js/all.map"}}
+                       #_:prod #_{:source-paths ["src/devtools/cljs"]
+                              :compiler {:asset-path "js"
+                                         :optimizations :advanced
+                                         :pretty-print false
+                                         :output-dir "resources/devtools/js"
+                                         :output-to "resources/devtools/js/all.js"
+                                         :source-map "resources/devtools/js/all.map"
+                                         :externs ["externs/chrome.js"]}}}})

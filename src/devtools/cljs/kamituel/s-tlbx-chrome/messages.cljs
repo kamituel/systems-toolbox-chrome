@@ -32,8 +32,7 @@
 
 (defn view-fn
   [{:keys [observed local cmd]}]
-  (let [{:keys [messages selected-message]} @observed
-        oldest-ts (-> messages last :ts)]
+  (let [{:keys [messages selected-message first-message-ts]} @observed]
     [:table
      [:tr
        [:th.msg-count "#"]
@@ -41,13 +40,13 @@
        [:th.msg-from-component "Source"]
        [:th.msg-to-component "Destination"]
        [:th.msg-command "Command"]]
-      (for [{:keys [idx guid src-cmp dst-cmp command ts corr-id] :as msg}
-            (map-indexed (fn [idx msg] (assoc msg :idx idx)) (reverse messages))]
-        ^{:key corr-id}
+      (for [{:keys [row-number idx guid src-cmp dst-cmp command ts corr-id] :as msg}
+            (map-indexed (fn [row-number msg] (assoc msg :row-number row-number)) messages)]
+        ^{:key row-number}
         [:tr (merge {:on-click (cmd :cmd/message-details msg)}
                     (when (= (:corr-id selected-message) (:corr-id msg)) {:class :selected}))
          [:td idx]
-         [:td (/ (- ts oldest-ts) 1000)]
+         [:td (/ (- ts first-message-ts) 1000)]
          [:td (str src-cmp)]
          [:td (str dst-cmp)]
          [:td (str command)]])]))

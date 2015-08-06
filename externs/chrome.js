@@ -1,0 +1,9 @@
+window.chrome;
+window.chrome.runtime;
+window.chrome.devtools;
+window.chrome.devtools.inspectedWindow;
+window.chrome.devtools.inspectedWindow.tabId;
+chrome.runtime;
+chrome.devtools;
+chrome.devtools.inspectedWindow;
+chrome.devtools.inspectedWindow.tabId;

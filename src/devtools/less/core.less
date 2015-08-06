@@ -17,7 +17,7 @@ body {
   height: 100%;
 }
 
-#messages, #state-snapshots, #probe-error {
+#messages, #state-snapshots, #settings, #probe-error {
   padding: 0px 15px 0px 15px;
   margin-left: 30px;
   display :none;
@@ -45,6 +45,10 @@ body[view='state-snapshots'] #state-snapshots {
 
 body[view='state-snapshots'] #sidebar {
   display: none;
+}
+
+body[view='settings'] #settings {
+  display: block;
 }
 
 body[view='probe-error'] {
@@ -357,6 +361,24 @@ span[class*="icon-"].warn {
 
 span[class*="icon-"].confirm {
   color: #22cc22;
+}
+
+#settings {
+  padding-top: 20px;
+
+  label {
+    font-family: sans-serif;
+    width: 300px;
+    display: inline-block;
+  }
+
+  p {
+    display: inline-block;
+    width: 60px;
+  }
+
+  input {
+  }
 }
 
 @import 'edn';
