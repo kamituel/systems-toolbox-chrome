@@ -316,6 +316,7 @@ span[class*="icon-"].confirm {
 #settings p {
   display: inline-block;
   width: 60px;
+  margin: 0;
 }
 /* Colors */
 .edn-tree .map:before,

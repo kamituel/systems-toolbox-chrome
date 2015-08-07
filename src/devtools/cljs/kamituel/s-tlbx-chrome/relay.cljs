@@ -27,7 +27,9 @@
     "read_recordings"
     (fn [response err]
       (if err
-        (put-fn [:cmd/probe-error])
+        (do
+          (prn err)
+          (put-fn [:cmd/probe-error]))
         (let [{:keys [messages state-snapshots]}
               (decode-js-keywords (js->clj response :keywordize-keys false))]
           (put-fn [:cmd/new-messages messages])
