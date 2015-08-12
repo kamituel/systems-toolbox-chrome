@@ -18,7 +18,7 @@ body {
 }
 
 #messages, #state-snapshots, #settings, #probe-error {
-  padding: 0px 15px 0px 15px;
+  padding: 0px;
   margin-left: 30px;
   display :none;
   height: 100%;
@@ -32,6 +32,7 @@ body {
 #state-snapshots {
   height: 100%;
   margin-right: 35px;
+  padding-left: 15px;
   position: relative;
 }
 
@@ -103,17 +104,15 @@ table {
   }
 }
 
-#messages {
-  table {
-    margin-bottom: 15px;
-  }
-}
-
 #messages table {
   margin-bottom: 15px;
 
   td:empty {
-    background-color: #dd2222;
+    color: #ff2222;
+
+    &:before {
+      content: "! No end point?";
+    }
   }
 
   th {
@@ -143,9 +142,25 @@ table {
     }
   }
 
-  tr:hover, tr.selected {
+  td:first-child, th.msg-count,
+  td:nth-child(2), th.msg-timestamp {
+    text-align: right;
+    padding-right: 10px;
+  }
+
+  tr.highlighted {
+    background-color: #555;
+    color: #fff;
+  }
+
+  tr:hover, tr.hover {
     background-color: #111;
     cursor: pointer;
+  }
+
+  tr.highlighted.hover, tr.highlighted:hover {
+    background-color: #fff;
+    color: #000;
   }
 }
 
@@ -376,6 +391,7 @@ span[class*="icon-"].confirm {
 
 #settings {
   padding-top: 20px;
+  padding-left: 15px;
 
   label {
     font-family: sans-serif;

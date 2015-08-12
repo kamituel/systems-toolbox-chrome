@@ -18,7 +18,7 @@ body {
 #state-snapshots,
 #settings,
 #probe-error {
-  padding: 0px 15px 0px 15px;
+  padding: 0px;
   margin-left: 30px;
   display: none;
   height: 100%;
@@ -30,6 +30,7 @@ body {
 #state-snapshots {
   height: 100%;
   margin-right: 35px;
+  padding-left: 15px;
   position: relative;
 }
 body[view='messages'] #messages {
@@ -89,11 +90,11 @@ table td {
 #messages table {
   margin-bottom: 15px;
 }
-#messages table {
-  margin-bottom: 15px;
-}
 #messages table td:empty {
-  background-color: #dd2222;
+  color: #ff2222;
+}
+#messages table td:empty:before {
+  content: "! No end point?";
 }
 #messages table th.msg-count {
   min-width: 50px;
@@ -115,10 +116,26 @@ table td {
   min-width: 170px;
   width: 100%;
 }
+#messages table td:first-child,
+#messages table th.msg-count,
+#messages table td:nth-child(2),
+#messages table th.msg-timestamp {
+  text-align: right;
+  padding-right: 10px;
+}
+#messages table tr.highlighted {
+  background-color: #555;
+  color: #fff;
+}
 #messages table tr:hover,
-#messages table tr.selected {
+#messages table tr.hover {
   background-color: #111;
   cursor: pointer;
+}
+#messages table tr.highlighted.hover,
+#messages table tr.highlighted:hover {
+  background-color: #fff;
+  color: #000;
 }
 #sidebar {
   width: 35%;
@@ -307,6 +324,7 @@ span[class*="icon-"].confirm {
 }
 #settings {
   padding-top: 20px;
+  padding-left: 15px;
 }
 #settings label {
   font-family: sans-serif;

@@ -1,6 +1,7 @@
 (ns kamituel.s-tlbx-chrome.messages
   "Table with messages as intercepted from the current tab."
-  (:require [matthiasn.systems-toolbox.reagent :as r]
+  (:require [kamituel.s-tlbx-chrome.utils :as u]
+            [matthiasn.systems-toolbox.reagent :as r]
             [clojure.string :as s]))
 
 (defonce container-dom-id "messages")
@@ -49,7 +50,7 @@
                                          (= (:corr-id selected-message) corr-id) (conj "hover")
                                          (= selected-tag tag) (conj "highlighted")))}
          [:td idx]
-         [:td (/ (- ts first-message-ts) 1000)]
+         [:td (u/number->str (/ (- ts first-message-ts) 1000) 3)]
          [:td (str src-cmp)]
          [:td (str dst-cmp)]
          [:td (str command)]])]))

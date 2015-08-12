@@ -11,6 +11,19 @@
          (if (< m 10) "0") m ":"
          (if (< s 10) "0") s)))
 
+(defn number->str
+  "Converts a number to a string with a given number of decimal places.
+  I.e. for three decimal places:
+    3      -> 3.000
+    3.1    -> 3.100
+    3.123  -> 3.123
+    3.1238 -> 3.123"
+  [n decimal-places]
+  (let [s (str n)
+        s-decimal (if (re-find #"\." s) s (str s ".0"))
+        fill-zeros (apply str (take decimal-places (repeat 0)))]
+    (re-find (re-pattern (str ".*\\..{" decimal-places "}")) (str s-decimal fill-zeros))))
+
 (defn raw-msg->map
   "Converts message as received from the toolbox's firehose to the simple map."
   [msg]
