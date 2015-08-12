@@ -29,6 +29,8 @@
    :state-snapshots {}
    ;; Currently selected message.
    :selected-message nil
+   ;; User can click a message tag and all messages with that tag will get highlighted.
+   :selected-tag nil
    :message-filters (:message-filters @settings)
    :view :messages})
 
@@ -61,6 +63,26 @@
                sent-message)))
          sent)))
 
+(defn fix-message-order
+  "Messages that originate in distributed systems (i.e. on the frontend ran in a browser and
+  a backend ran on a remote server) could be delivered via the firehose out of order. This
+  function restores that order based on an observation that all messages related to one event
+  are using the same :tag, and that for messages with the given tag, first message will have
+  one element in :cmp-seq, second - two, etc."
+  [messages]
+  (sort (fn [msg1 msg2]
+          (if (not= (:tag msg1) (:tag msg2))
+            0
+            (cond
+              (< (count (:cmp-seq msg1))
+                 (count (:cmp-seq msg2)))
+              -1
+              (> (count (:cmp-seq msg1))
+                 (count (:cmp-seq msg2)))
+              1
+              :else
+              0))) messages))
+
 (defn message-matches-all-criteria?
   [pred-fn filter-criteria msg]
   (let [msg-matches-one-criterium? (fn [{:keys [src-cmp dst-cmp command]} msg-map]
@@ -80,6 +102,7 @@
 (defn handle-new-messages
   "Analyzes new messages and appends them to the :messages list in a state."
   [{:keys [cmp-state msg-payload]}]
+  (prn "new msgs raw" (count msg-payload))
   (let [{:keys [view total-messages-count message-limit first-message-ts]} @cmp-state
         assign-message-idx (fn [total-count msgs]
                              (map-indexed #(assoc %2 :idx (+ %1 1 total-count)) msgs))
@@ -87,8 +110,10 @@
                       reverse
                       (map (partial u/raw-msg->map))
                       correlate-sender-with-receiver
+                      fix-message-order
                       (assign-message-idx total-messages-count))
         messages-filtered (apply-message-filters cmp-state messages)]
+   (prn "new messages correlated" (count messages))
    (when (= :probe-error view) (show-component {:cmp-state cmp-state :msg-payload :cmp/messages}))
    (when (zero? first-message-ts) (swap! cmp-state assoc :first-message-ts (-> messages first :ts)))
    (swap! cmp-state update-in [:total-messages-count] (partial + (count messages)))
@@ -110,7 +135,8 @@
 (defn show-message-details
   "Makes one message selected, so it can be shown in the sidebar."
   [{:keys [cmp-state msg-payload]}]
-  (swap! cmp-state assoc :selected-message msg-payload))
+  (swap! cmp-state assoc :selected-message msg-payload)
+  (swap! cmp-state assoc :selected-tag (:tag msg-payload)))
 
 (defn add-message-filter
   "Filters message fiter."

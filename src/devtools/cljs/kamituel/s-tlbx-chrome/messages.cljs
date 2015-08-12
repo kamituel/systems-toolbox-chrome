@@ -1,6 +1,7 @@
 (ns kamituel.s-tlbx-chrome.messages
   "Table with messages as intercepted from the current tab."
-  (:require [matthiasn.systems-toolbox.reagent :as r]))
+  (:require [matthiasn.systems-toolbox.reagent :as r]
+            [clojure.string :as s]))
 
 (defonce container-dom-id "messages")
 
@@ -32,7 +33,7 @@
 
 (defn view-fn
   [{:keys [observed local cmd]}]
-  (let [{:keys [messages selected-message first-message-ts]} @observed]
+  (let [{:keys [messages selected-message selected-tag first-message-ts]} @observed]
     [:table
      [:tr
        [:th.msg-count "#"]
@@ -40,11 +41,13 @@
        [:th.msg-from-component "Source"]
        [:th.msg-to-component "Destination"]
        [:th.msg-command "Command"]]
-      (for [{:keys [row-number idx guid src-cmp dst-cmp command ts corr-id] :as msg}
+      (for [{:keys [row-number idx guid src-cmp dst-cmp command ts corr-id tag] :as msg}
             (map-indexed (fn [row-number msg] (assoc msg :row-number row-number)) messages)]
         ^{:key row-number}
-        [:tr (merge {:on-click (cmd :cmd/message-details msg)}
-                    (when (= (:corr-id selected-message) (:corr-id msg)) {:class :selected}))
+        [:tr {:on-click (cmd :cmd/message-details msg)
+              :class (s/join " " (cond-> []
+                                         (= (:corr-id selected-message) corr-id) (conj "hover")
+                                         (= selected-tag tag) (conj "highlighted")))}
          [:td idx]
          [:td (/ (- ts first-message-ts) 1000)]
          [:td (str src-cmp)]

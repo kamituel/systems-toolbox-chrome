@@ -13,23 +13,19 @@
 
 (defn raw-msg->map
   "Converts message as received from the toolbox's firehose to the simple map."
-  ([msg]
-    (raw-msg->map msg nil))
-  ([msg opt]
-   (if-not msg
-     nil
-    (cond-> {:src-cmp (-> msg :msg-payload :cmp-id)
-             :dst-cmp (-> msg :dest-cmp)
-             :command (-> msg :msg-payload :msg first)
-             :payload (-> msg :msg-payload :msg second)
-             :meta    (-> msg :msg-payload :msg-meta)
-             :ts      (-> msg :msg-meta :s-tlbx-probe/probe :in-ts)
-             :type    (-> msg :msg-type)
-             :corr-id (-> msg :msg-payload :msg-meta :corr-id)
-             :tag     (-> msg :msg-payload :msg-meta :tag)}
-            (= :stringify-keywords opt) (update-in [:src-cmp] (partial str))
-            (= :stringify-keywords opt) (update-in [:dst-cmp] (partial str))
-            (= :stringify-keywords opt) (update-in [:command] (partial str))))))
+  [msg]
+  (if-not msg
+    nil
+    {:src-cmp (-> msg :msg-payload :cmp-id)
+     :dst-cmp (-> msg :dest-cmp)
+     :command (-> msg :msg-payload :msg first)
+     :payload (-> msg :msg-payload :msg second)
+     :meta    (-> msg :msg-payload :msg-meta)
+     :ts      (-> msg :msg-meta :s-tlbx-probe/probe :in-ts)
+     :type    (-> msg :msg-type)
+     :corr-id (-> msg :msg-payload :msg-meta :corr-id)
+     :tag     (-> msg :msg-payload :msg-meta :tag)
+     :cmp-seq (-> msg :msg-payload :msg-meta :cmp-seq)}))
 
 (defn msg-printable
   [msg]
