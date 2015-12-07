@@ -35,7 +35,7 @@
 
 (defn mk-state
   [put-fn]
-  (atom {}))
+  {:state (atom {})})
 
 (defn component
   [cmp-id]

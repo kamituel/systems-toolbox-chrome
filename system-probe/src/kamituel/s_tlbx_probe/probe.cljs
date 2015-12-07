@@ -67,7 +67,7 @@
 
 (defn mk-state
   []
-  state)
+  {:state state})
 
 (defn component
   [cmp-id]

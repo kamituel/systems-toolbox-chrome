@@ -195,7 +195,7 @@
 
 (defn mk-state
   [put-fn]
-  (atom (initial-state)))
+  {:state (atom (initial-state))})
 
 (defn component
   [cmp-id]
