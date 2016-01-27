@@ -69,19 +69,21 @@
   []
   {:state state})
 
-(defn component
+(defn cmp-map
   [cmp-id]
-  (comp/make-component {:cmp-id cmp-id
-                        :state-fn mk-state
-                        :handler-map {:firehose/cmp-put           handle-message
-                                      :firehose/cmp-recv          handle-message
-                                      :firehose/cmp-publish-state handle-state-snapshot
-                                      ;:firehose/cmp-recv-state    log
-                                      }}))
+  {:cmp-id       cmp-id
+   :state-fn     mk-state
+   :handler-map {:firehose/cmp-put           handle-message
+                 :firehose/cmp-recv          handle-message
+                 :firehose/cmp-publish-state handle-state-snapshot
+                 ;:firehose/cmp-recv-state    log
+                 }
+   ;; TODO: verify it helps with figwheel reloading.
+   :opts         {:reload-cmp false}})
 
 (defn init
   [switchboard]
   (sb/send-mult-cmd
     switchboard
-    [[:cmd/wire-comp [(component :s-tlbx-probe/probe)]]
+    [[:cmd/init-comp [(cmp-map :s-tlbx-probe/probe)]]
      [:cmd/attach-to-firehose :s-tlbx-probe/probe]]))

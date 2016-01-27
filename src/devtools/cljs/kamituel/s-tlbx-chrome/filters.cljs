@@ -1,7 +1,7 @@
 (ns kamituel.s-tlbx-chrome.filters
   "List of filters that have been set up."
   (:require [kamituel.s-tlbx-chrome.utils :as u]
-            [matthiasn.systems-toolbox.reagent :as r]))
+            [matthiasn.systems-toolbox-ui.reagent :as r]))
 
 (defn toggle-button
   [local path on-label off-label]
@@ -61,9 +61,9 @@
               (when (new-filter-valid? local selected-message)
                 [:span.icon-plus-circled.confirm {:on-click (cmd :cmd/add-message-filter (filter-criteria @local selected-message))}])]]))]]]))
 
-(defn component
+(defn cmp-map
   [cmp-id]
-  (r/component {:cmp-id      cmp-id
-                :view-fn     view-fn
-                :initial-state {:new-filter {:type false :src-cmp false :dst-cmp false :command true}}
-                :dom-id      "filters"}))
+  (r/cmp-map {:cmp-id      cmp-id
+              :view-fn     view-fn
+              :initial-state {:new-filter {:type false :src-cmp false :dst-cmp false :command true}}
+              :dom-id      "filters"}))

@@ -197,20 +197,20 @@
   [put-fn]
   {:state (atom (initial-state))})
 
-(defn component
+(defn cmp-map
   [cmp-id]
-  (comp/make-component {:cmp-id      cmp-id
-                        :state-fn    mk-state
-                        :handler-map {:cmd/probe-error           handle-probe-error
-                                      :cmd/new-messages          handle-new-messages
-                                      :cmd/new-state-snapshots   handle-new-state-snapshots
-                                      :cmd/message-details       show-message-details
-                                      :cmd/add-message-filter    add-message-filter
-                                      :cmd/remove-message-filter remove-message-filter
-                                      :cmd/clear-messages        clear-messages
-                                      :cmd/clear-state-snapshots clear-state-snapshots
-                                      :cmd/next-younger-message  next-younger-message
-                                      :cmd/next-older-message    next-older-message
-                                      :cmd/set-message-limit     set-message-limit
-                                      :cmd/reset                 reset
-                                      :cmd/show-component        show-component}}))
+  {:cmp-id      cmp-id
+   :state-fn    mk-state
+   :handler-map {:cmd/probe-error           handle-probe-error
+                 :cmd/new-messages          handle-new-messages
+                 :cmd/new-state-snapshots   handle-new-state-snapshots
+                 :cmd/message-details       show-message-details
+                 :cmd/add-message-filter    add-message-filter
+                 :cmd/remove-message-filter remove-message-filter
+                 :cmd/clear-messages        clear-messages
+                 :cmd/clear-state-snapshots clear-state-snapshots
+                 :cmd/next-younger-message  next-younger-message
+                 :cmd/next-older-message    next-older-message
+                 :cmd/set-message-limit     set-message-limit
+                 :cmd/reset                 reset
+                 :cmd/show-component        show-component}})

@@ -1,7 +1,7 @@
 (ns kamituel.s-tlbx-chrome.messages
   "Table with messages as intercepted from the current tab."
   (:require [kamituel.s-tlbx-chrome.utils :as u]
-            [matthiasn.systems-toolbox.reagent :as r]
+            [matthiasn.systems-toolbox-ui.reagent :as r]
             [clojure.string :as s]))
 
 (defonce container-dom-id "messages")
@@ -55,10 +55,10 @@
          [:td (str dst-cmp)]
          [:td (str command)]])]))
 
-(defn component
+(defn cmp-map
   [cmp-id]
-  (r/component {:cmp-id      cmp-id
-                :view-fn     view-fn
-                :dom-id      container-dom-id
-                :lifecycle-callbacks {:component-will-update save-scroll-status
-                                      :component-did-update scroll-if-needed}}))
+  (r/cmp-map {:cmp-id      cmp-id
+              :view-fn     view-fn
+              :dom-id      container-dom-id
+              :lifecycle-callbacks {:component-will-update save-scroll-status
+                                    :component-did-update scroll-if-needed}}))

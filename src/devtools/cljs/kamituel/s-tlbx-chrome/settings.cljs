@@ -1,6 +1,6 @@
 (ns kamituel.s-tlbx-chrome.settings
   "Settings page."
-  (:require [matthiasn.systems-toolbox.reagent :as r]))
+  (:require [matthiasn.systems-toolbox-ui.reagent :as r]))
 
 (defn handle-input-event
   [f]
@@ -16,8 +16,8 @@
      [:input {:type :range :min message-limit-min :max message-limit-max :value message-limit
               :on-change (handle-input-event #(put-fn [:cmd/set-message-limit %]))}]]))
 
-(defn component
+(defn cmp-map
   [cmp-id]
-  (r/component {:cmp-id      cmp-id
-                :view-fn     view-fn
-                :dom-id      "settings"}))
+  (r/cmp-map {:cmp-id      cmp-id
+              :view-fn     view-fn
+              :dom-id      "settings"}))

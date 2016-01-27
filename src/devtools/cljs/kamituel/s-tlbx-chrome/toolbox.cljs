@@ -1,6 +1,6 @@
 (ns kamituel.s-tlbx-chrome.toolbox
   "Toolbox with buttons."
-  (:require [matthiasn.systems-toolbox.reagent :as r]))
+  (:require [matthiasn.systems-toolbox-ui.reagent :as r]))
 
 (defn component-button
   [cmd current-view label id]
@@ -22,8 +22,8 @@
         [:button {:on-click (cmd :cmd/clear-state-snapshots)} [:span.icon-cancel-circled]])
       [:button {:on-click (cmd :cmd/reset)} [:span.icon-attention.warn]]]]))
 
-(defn component
+(defn cmp-map
   [cmp-id]
-  (r/component {:cmp-id      cmp-id
-                :view-fn     view-fn
-                :dom-id      "toolbox"}))
+  (r/cmp-map {:cmp-id      cmp-id
+              :view-fn     view-fn
+              :dom-id      "toolbox"}))

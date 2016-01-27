@@ -1,7 +1,7 @@
 (ns kamituel.s-tlbx-chrome.state-snapshots
   "Table with state snapshots as intercepted from the current tab."
   (:require [kamituel.s-tlbx-chrome.utils :as u]
-            [matthiasn.systems-toolbox.reagent :as r]))
+            [matthiasn.systems-toolbox-ui.reagent :as r]))
 
 
 (defn view-fn
@@ -27,10 +27,10 @@
                              (swap! local assoc-in [:expanded selected-snapshot] path))))]]
       [:h2 "No state snapshots captured yet."])))
 
-(defn component
+(defn cmp-map
   [cmp-id]
-  (r/component {:cmp-id      cmp-id
-                :view-fn     view-fn
-                :initial-state {:selected-snapshot-cmp-id nil
-                                :expanded {}}
-                :dom-id      "state-snapshots"}))
+  (r/cmp-map {:cmp-id      cmp-id
+              :view-fn     view-fn
+              :initial-state {:selected-snapshot-cmp-id nil
+                              :expanded {}}
+              :dom-id      "state-snapshots"}))

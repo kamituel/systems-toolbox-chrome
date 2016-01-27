@@ -37,8 +37,8 @@
   [put-fn]
   {:state (atom {})})
 
-(defn component
+(defn cmp-map
   [cmp-id]
-  (comp/make-component {:cmp-id      cmp-id
-                        :state-fn    mk-state
-                        :handler-map {:cmd/read-from-app read-from-app}}))
+  {:cmp-id      cmp-id
+   :state-fn    mk-state
+   :handler-map {:cmd/read-from-app read-from-app}})

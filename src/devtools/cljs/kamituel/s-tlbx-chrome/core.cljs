@@ -22,15 +22,15 @@
   (devtools-probe/init switchboard)
   (sb/send-mult-cmd
     switchboard
-    [[:cmd/wire-comp
-      [(sched/component :cmp/scheduler)
-       (state/component :cmp/state)
-       (msgs/component :cmp/messages)
-       (filters/component :cmp/filters)
-       (state-snapshots/component :cmp/state-snapshots)
-       (msg-details/component :cmp/msg-details)
-       (toolbox/component :cmp/toolbox)
-       (settings/component :cmp/settings)]]
+    [[:cmd/init-comp
+      [(sched/cmp-map           :cmp/scheduler)
+       (state/cmp-map           :cmp/state)
+       (msgs/cmp-map            :cmp/messages)
+       (filters/cmp-map         :cmp/filters)
+       (state-snapshots/cmp-map :cmp/state-snapshots)
+       (msg-details/cmp-map     :cmp/msg-details)
+       (toolbox/cmp-map         :cmp/toolbox)
+       (settings/cmp-map        :cmp/settings)]]
 
      [:cmd/route {:from :cmp/messages :to :cmp/state}]
      [:cmd/route {:from :cmp/state-snapshots :to :cmp/state}]
@@ -39,12 +39,9 @@
      [:cmd/route {:from :cmp/filters :to :cmp/state}]
      [:cmd/route {:from :cmp/settings :to :cmp/state}]
 
-     [:cmd/observe-state {:from :cmp/state :to :cmp/messages}]
-     [:cmd/observe-state {:from :cmp/state :to :cmp/state-snapshots}]
-     [:cmd/observe-state {:from :cmp/state :to :cmp/msg-details}]
-     [:cmd/observe-state {:from :cmp/state :to :cmp/toolbox}]
-     [:cmd/observe-state {:from :cmp/state :to :cmp/filters}]
-     [:cmd/observe-state {:from :cmp/state :to :cmp/settings}]
+     [:cmd/observe-state {:from :cmp/state
+                          :to [:cmp/messages :cmp/state-snapshots :cmp/msg-details :cmp/toolbox
+                               :cmp/filters :cmp/settings]}]
 
      ;; Show messages panel by default.
      [:cmd/send {:to :cmp/state :msg [:cmd/show-component :cmp/messages]}]])
@@ -52,10 +49,10 @@
   (if chrome/in-chrome?
     (sb/send-mult-cmd
       switchboard
-      [[:cmd/wire-comp [(relay/component :cmp/relay)]]
+      [[:cmd/init-comp [(relay/cmp-map :cmp/relay)]]
        [:cmd/route {:from :cmp/relay :to :cmp/state}]
 
-       ;; Send a periods message to relay to read the latest recordings from the app.
+       ;; Send a periodic message to relay to read the latest recordings from the app.
        [:cmd/route {:from :cmp/scheduler :to :cmp/relay}]
        [:cmd/send {:to :cmp/scheduler
                    :msg [:cmd/schedule-new

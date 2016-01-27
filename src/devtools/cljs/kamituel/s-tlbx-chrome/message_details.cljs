@@ -2,7 +2,7 @@
   "Opens a sidebar pane displaying the whole message."
   (:require [kamituel.s-tlbx-chrome.utils :as u]
             [kamituel.s-tlbx-chrome.chrome :as chrome]
-            [matthiasn.systems-toolbox.reagent :as r]))
+            [matthiasn.systems-toolbox-ui.reagent :as r]))
 
 (defn bind-to-key-up-down-evts
   "Allow key up / key down navigation throught the list of messages."
@@ -37,9 +37,9 @@
                                                 (swap! local assoc :expanded-meta path))))]]
       [:div "No message selected."])]]))
 
-(defn component
+(defn cmp-map
   [cmp-id]
-  (r/component {:cmp-id      cmp-id
-                :view-fn     view-fn
-                :init-fn     bind-to-key-up-down-evts
-                :dom-id      "message-details"}))
+  (r/cmp-map {:cmp-id      cmp-id
+              :view-fn     view-fn
+              :init-fn     bind-to-key-up-down-evts
+              :dom-id      "message-details"}))
