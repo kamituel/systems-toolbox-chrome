@@ -2,7 +2,7 @@
   "manifest_version": 2,
   "name": "systems-toolbox-chrome",
   "description": "Chrome DevTools support for systems-toolbox library",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "devtools_page": "resources/devtools/devtools.html",
   "permissions": [
     "tabs",

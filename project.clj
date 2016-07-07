@@ -1,13 +1,14 @@
-(defproject kamituel/systems-toolbox-chrome "0.1.3"
+(defproject kamituel/systems-toolbox-chrome "0.1.4"
   :description "Chrome DevTools support for systems-toolbox library"
   :url "https://github.com/kamituel/systems-toolbox-chrome"
   :license {:name "Eclipse Public License"
             :url "http://www.eclipse.org/legal/epl-v10.html"}
   :dependencies [[org.clojure/clojure "1.7.0"]
-                 [org.clojure/clojurescript "1.7.189"]
-                 [matthiasn/systems-toolbox "0.5.6"]
-                 [matthiasn/systems-toolbox-ui "0.5.2"]
-                 [kamituel/s-tlbx-probe "0.1.3"]
+                 [org.clojure/clojurescript "1.9.76"]
+                 [matthiasn/systems-toolbox "0.5.22"]
+                 [matthiasn/systems-toolbox-ui "0.5.9"]
+                 [matthiasn/systems-toolbox-sente "0.5.18"]
+                 [kamituel/s-tlbx-probe "0.1.4"]
                  [alandipert/storage-atom "1.2.4" :exclusions [org.clojure/clojure org.clojure/clojurescript]]]
   :plugins [[lein-cljsbuild "1.1.1"]]
   :clean-targets ^{:protect false} ["resources/devtools/js/"]
