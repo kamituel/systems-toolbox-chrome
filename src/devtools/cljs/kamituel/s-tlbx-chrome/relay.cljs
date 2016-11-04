@@ -2,20 +2,13 @@
   "Relays data to/from extensions's background page."
   (:require [matthiasn.systems-toolbox.component :as comp]
             [kamituel.s-tlbx-chrome.chrome :as chrome]
+            [cognitect.transit :as transit]
             [clojure.string :as s]
             [clojure.walk :refer [postwalk]]))
 
-(defn decode-js-keywords
-  "clj->js strips the namespace part from the keywords. This fn replaces :a/b with \"a__b\""
-  [data]
-  (postwalk (fn [form]
-              (if (or (keyword? form) (string? form))
-                (let [form-name (if (keyword? form) (subs (str form) 1) form)
-                      [k k-ns k-name] (s/split form-name #"---")]
-                  (if (= "keyword" k)
-                    (keyword (if (empty? k-ns) nil k-ns) k-name)
-                    form))
-                form)) data))
+
+(def transit-reader
+  (transit/reader :json))
 
 (defn probe-ipc
   [method-name callback]
@@ -28,8 +21,9 @@
     (fn [response err]
       (if err
         (put-fn [:cmd/probe-error])
-        (let [{:keys [messages state-snapshots]}
-              (decode-js-keywords (js->clj response :keywordize-keys false))]
+        (let [{:keys [messages state-snapshots probe-init-timestamp]}
+              (transit/read transit-reader response)]
+          (put-fn [:cmd/set-probe-init-ts probe-init-timestamp])
           (put-fn [:cmd/new-messages messages])
           (put-fn [:cmd/new-state-snapshots state-snapshots]))))))
 

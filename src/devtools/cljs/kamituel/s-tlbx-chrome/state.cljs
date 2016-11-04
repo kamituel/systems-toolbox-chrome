@@ -17,9 +17,9 @@
    ;; Total number of messages captured since extension started working. Does include messages
    ;; filtered and messages that have been removed because message-limit was reached.
    :total-messages-count 0
-   ;; Timestamp of the first message captured. Used to display relative time of each subsequent
+   ;; Timestamp of the probe initialization. Used to display relative time of each subsequent
    ;; message.
-   :first-message-ts 0
+   :probe-init-ts 0
    ;; Number of messages to show on the list.
    :message-limit (:message-limit @settings)
    ;; User is allowed to adjust :message-limit. These set the min and max value possible.
@@ -102,8 +102,8 @@
 (defn handle-new-messages
   "Analyzes new messages and appends them to the :messages list in a state."
   [{:keys [cmp-state msg-payload]}]
-  (prn "new msgs raw" (count msg-payload))
-  (let [{:keys [view total-messages-count message-limit first-message-ts]} @cmp-state
+  (.time js/console "handle-new-messages")
+  (let [{:keys [view total-messages-count message-limit]} @cmp-state
         assign-message-idx (fn [total-count msgs]
                              (map-indexed #(assoc %2 :idx (+ %1 1 total-count)) msgs))
         messages (->> msg-payload
@@ -113,9 +113,8 @@
                       fix-message-order
                       (assign-message-idx total-messages-count))
         messages-filtered (apply-message-filters cmp-state messages)]
-   (prn "new messages correlated" (count messages))
+   (.timeEnd js/console "handle-new-messages")
    (when (= :probe-error view) (show-component {:cmp-state cmp-state :msg-payload :cmp/messages}))
-   (when (zero? first-message-ts) (swap! cmp-state assoc :first-message-ts (-> messages first :ts)))
    (swap! cmp-state update-in [:total-messages-count] (partial + (count messages)))
    (swap! cmp-state update-in [:messages] (fn [msgs]
                                             (->> (concat msgs messages-filtered)
@@ -193,6 +192,11 @@
   (swap! cmp-state assoc :message-limit msg-payload)
   (persist-settings cmp-state))
 
+(defn set-probe-init-ts
+  "Probe init timestamp is used to show the relative time when each message got received."
+  [{:keys [cmp-state msg-payload]}]
+  (swap! cmp-state assoc :probe-init-ts msg-payload))
+
 (defn mk-state
   [put-fn]
   {:state (atom (initial-state))})
@@ -201,7 +205,8 @@
   [cmp-id]
   {:cmp-id      cmp-id
    :state-fn    mk-state
-   :handler-map {:cmd/probe-error           handle-probe-error
+   :handler-map {:cmd/set-probe-init-ts     set-probe-init-ts
+                 :cmd/probe-error           handle-probe-error
                  :cmd/new-messages          handle-new-messages
                  :cmd/new-state-snapshots   handle-new-state-snapshots
                  :cmd/message-details       show-message-details

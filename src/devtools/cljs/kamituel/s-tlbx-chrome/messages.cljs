@@ -34,7 +34,7 @@
 
 (defn view-fn
   [{:keys [observed local cmd]}]
-  (let [{:keys [messages selected-message selected-tag first-message-ts]} @observed]
+  (let [{:keys [messages selected-message selected-tag probe-init-ts]} @observed]
     [:table
      [:tr
        [:th.msg-count "#"]
@@ -50,7 +50,7 @@
                                          (= (:corr-id selected-message) corr-id) (conj "hover")
                                          (= selected-tag tag) (conj "highlighted")))}
          [:td idx]
-         [:td (u/number->str (/ (- ts first-message-ts) 1000) 3)]
+         [:td (u/number->str (/ (- ts probe-init-ts) 1000) 3)]
          [:td (str src-cmp)]
          [:td (str dst-cmp)]
          [:td (str command)]])]))

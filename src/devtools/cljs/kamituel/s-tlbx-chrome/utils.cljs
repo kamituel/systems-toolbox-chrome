@@ -70,7 +70,7 @@
                            (data->hiccup (empty v) expanded-path on-expand-fn [])]))]
       (cond
         (map? data)
-        [:div.map (for [[k v] data]
+        [:div.map (for [[k v] (sort data)]
                     ^{:key (hash (conj current-path k))}
                     [:div.key-val
                      [:div (data->hiccup k expanded-path on-expand-fn (conj current-path k))]
@@ -83,7 +83,7 @@
                        (handle-coll v idx))]
 
         (seq? data)
-        [:div.seq (for [[idx v] (map-indexed (fn [idx v] [idx v]) data)]
+        [:div.seq (for [[idx v] (map-indexed (fn [idx v] [idx v]) (sort data))]
                     ^{:key (hash (conj current-path idx))}
                     (handle-coll v idx))]
 
@@ -121,4 +121,3 @@
     (.stopPropagation evt)
     (f)
     true))
-

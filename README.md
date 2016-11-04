@@ -87,3 +87,19 @@ point to the local clone of this repo ("systems-toolbox-chrome").
 
 **Step 4:**
 Open your systems application and then open Chrome Developer Tools. You'll see "Systems Toolbox" tab there.
+
+## Known bugs
+
+- When you pass around result of transducer/sequence operation, it might break systems probe.
+  It's a bug in Transit, see **[this issue](https://github.com/cognitect/transit-cljs/issues/30)**.
+  Workaround is:
+
+  ```clojure
+  (apply list (sequence ...))
+  ```
+
+  or:
+
+  ```clojure
+  (vec (sequence ...))
+  ```

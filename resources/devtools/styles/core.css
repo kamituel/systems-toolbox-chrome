@@ -226,18 +226,26 @@ table td {
 #components button.selected {
   color: white;
 }
+#state-snapshots > div {
+  display: flex;
+  flex-direction: row;
+}
 #state-snapshots ul.tabs {
   list-style-type: none;
   padding: 0;
   margin: 0;
   margin-top: 10px;
+  flex: 1 0 auto;
+  max-height: calc(100% - 20px);
+  overflow: scroll;
+  padding-right: 10px;
+  border-right: 1px dashed white;
 }
 #state-snapshots ul.tabs li {
-  display: inline-block;
+  display: block;
   height: 12px;
   font-size: 11px;
   padding: 2px 8px 3px 8px;
-  border: 1px dashed white;
   cursor: pointer;
   -webkit-transition: all 0.15s ease-in;
 }
@@ -245,6 +253,11 @@ table td {
 #state-snapshots ul.tabs li.selected {
   background-color: white;
   color: black;
+}
+#state-snapshots .edn-tree {
+  flex: 1 0 auto;
+  margin-left: 20px;
+  margin-top: 10px;
 }
 #filters {
   color: black;

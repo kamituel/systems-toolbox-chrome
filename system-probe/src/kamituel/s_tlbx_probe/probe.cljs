@@ -3,6 +3,7 @@
   and messages and exposes those to the Chrome DevTools extension."
   (:require [matthiasn.systems-toolbox.component :as comp]
             [matthiasn.systems-toolbox.switchboard :as sb]
+            [cognitect.transit :as transit]
             [clojure.walk :refer [postwalk]]
             [cljs.pprint :as pprint]))
 
@@ -16,16 +17,11 @@
                       ;; accumulating many messages / state snapshots in this atom which could clog
                       ;; the memory and make target application unresponsive.
                       :readout-timeout 10000
-                      :readout-timeout-id nil}))
+                      :readout-timeout-id nil
+                      :probe-init-timestamp (.getTime (js/Date.))}))
 
-(defn encode-js-keywords
-  "clj->js strips the namespace part from the keywords. This fn replaces :a/b with \"a__b\"
-  so it can be recovered on the other end."
-  [data]
-  (postwalk (fn [form]
-              (if (keyword? form)
-                (str "keyword---" (namespace form) "---" (name form))
-                form)) data))
+(def transit-writer
+  (transit/writer :json))
 
 (defn stop-recording
   []
@@ -49,10 +45,14 @@
 (defn ^:export read-recordings
   [n]
   (start-recording)
-  (let [recordings (select-keys @state [:messages :state-snapshots])]
+  (let [recordings (select-keys @state [:messages :state-snapshots :probe-init-timestamp])
+        try-write #(try
+                     (transit/write transit-writer %)
+                     (catch :default e
+                       (.error js/console "Failed to serialize" e (.-data e))))]
     (swap! state assoc :messages '())
     (swap! state assoc :state-snapshots '())
-    (clj->js (encode-js-keywords recordings))))
+    (try-write recordings)))
 
 (defn handle-message
   [arg]

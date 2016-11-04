@@ -13,7 +13,7 @@
     (if-not (empty? snapshots)
       [:div
         [:ul.tabs
-         (for [[cmp-id snapshot] snapshots]
+         (for [[cmp-id snapshot] (sort snapshots)]
            ^{:key cmp-id}
            [:li (merge {:on-click (u/cbk #(swap! local assoc :selected-snapshot-cmp-id cmp-id))}
                        (when (= cmp-id selected-snapshot)
