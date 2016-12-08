@@ -83,7 +83,7 @@
                        (handle-coll v idx))]
 
         (seq? data)
-        [:div.seq (for [[idx v] (map-indexed (fn [idx v] [idx v]) (sort data))]
+        [:div.seq (for [[idx v] (map-indexed (fn [idx v] [idx v]) data)]
                     ^{:key (hash (conj current-path idx))}
                     (handle-coll v idx))]
 
