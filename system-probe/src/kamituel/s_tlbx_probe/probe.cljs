@@ -55,15 +55,20 @@
     (try-write recordings)))
 
 (defn handle-message
-  [arg]
-  (when (:recording? @state)
-    (swap! state update-in [:messages] conj (select-keys arg [:msg-meta :msg-type :msg-payload]))))
+  [{:keys [current-state] :as msg-map}]
+  (prn "handling message" (:recording? current-state))
+  (when (:recording? current-state)
+    {:new-state
+     (update-in current-state [:messages] conj
+                (select-keys msg-map [:msg-meta :msg-type :msg-payload]))}))
 
 (defn handle-state-snapshot
-  [arg]
-  (let [cmp-id (-> arg :msg-payload :cmp-id)]
-    (when (and (:recording? @state) (not= cmp-id :s-tlbx-probe/probe))
-      (swap! state update-in [:state-snapshots] conj (select-keys arg [:msg-meta :msg-type :msg-payload])))))
+  [{:keys [current-state] :as msg-map}]
+  (let [cmp-id (-> msg-map :msg-payload :cmp-id)]
+    (when (and (:recording? current-state) (not= cmp-id :s-tlbx-probe/probe))
+      {:new-state
+       (update-in current-state [:state-snapshots] conj
+                  (select-keys msg-map [:msg-meta :msg-type :msg-payload]))})))
 
 (defn mk-state
   []
@@ -75,15 +80,15 @@
    :state-fn     mk-state
    :handler-map {:firehose/cmp-put           handle-message
                  :firehose/cmp-recv          handle-message
-                 :firehose/cmp-publish-state handle-state-snapshot
-                 ;:firehose/cmp-recv-state    log
-                 }
-   ;; TODO: verify it helps with figwheel reloading.
-   :opts         {:reload-cmp false}})
+                 :firehose/cmp-publish-state handle-state-snapshot}
+   :opts         {:reload-cmp false ;; TODO: verify it helps with figwheel reloading.
+                  :validate-in false
+                  :validate-out false
+                  :validate-state false}})
 
 (defn init
   [switchboard]
   (sb/send-mult-cmd
     switchboard
-    [[:cmd/init-comp [(cmp-map :s-tlbx-probe/probe)]]
+    [[:cmd/init-comp #{(cmp-map :s-tlbx-probe/probe)}]
      [:cmd/attach-to-firehose :s-tlbx-probe/probe]]))

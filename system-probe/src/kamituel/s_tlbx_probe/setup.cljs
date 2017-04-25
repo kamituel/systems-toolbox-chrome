@@ -19,8 +19,9 @@
 (defn with-firehose
   "If set to be enabled, enables msgs and state snapshots for each component map supplied."
   [enabled? cmp-map-xs]
-  (map (fn [cmp-map]
-         (if enabled?
-           (enable-firehose cmp-map)
-           cmp-map))
-       cmp-map-xs))
+  (set
+   (map (fn [cmp-map]
+          (if enabled?
+            (enable-firehose cmp-map)
+            cmp-map))
+        cmp-map-xs)))
