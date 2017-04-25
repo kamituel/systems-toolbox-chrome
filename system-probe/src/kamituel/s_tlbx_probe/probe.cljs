@@ -56,7 +56,6 @@
 
 (defn handle-message
   [{:keys [current-state] :as msg-map}]
-  (prn "handling message" (:recording? current-state))
   (when (:recording? current-state)
     {:new-state
      (update-in current-state [:messages] conj
