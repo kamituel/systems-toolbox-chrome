@@ -321,66 +321,12 @@ table {
   table {
     color: black;
 
-    th.type { width: 25px; }
-    th.src { width: 30%; }
-    th.dst { width: 30%; }
-    th.cmd { width: 30%; }
-    th.action { width: 25px; }
+    th:first-child { width: auto; }
+    td:last-child { width: 25px; }
 
     td span[class*="icon-"] {
       font-size: 16px;
-    }
-
-    td.remove span {
       cursor: pointer;
-      &:hover {
-        color: #dd3333;
-      }
-    }
-
-    td.single-col {
-      padding: 5px 25px 5px 25px;
-    }
-
-    tfoot {
-      td {
-        .toggle-button {
-          width: 50px;
-          height: 16px;
-          color: white;
-          padding: 0;
-          font-size: 12px;
-          margin-left: 0;
-
-          &:before {
-            background-color: #cc2222;
-          }
-
-          &:after {
-            background-color: #22aa55;
-          }
-        }
-
-        .toggle-text {
-          font-size: 12px;
-          display: block;
-          padding-left: 50px;
-          height: 18px;
-
-          &[data-state="off"] {
-            color: #888;
-          }
-
-          &[data-state="on"] {
-            color: #22aa55;
-          }
-        }
-
-        span[class*="icon-"] {
-          float: right;
-          margin-top: -14px;
-        }
-      }
     }
   }
 }

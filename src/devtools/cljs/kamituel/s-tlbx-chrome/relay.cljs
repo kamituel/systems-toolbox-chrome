@@ -11,21 +11,34 @@
   (transit/reader :json))
 
 (defn probe-ipc
-  [method-name callback]
-  (.eval (chrome/inspected-window) (str "kamituel.s_tlbx_probe.probe." method-name "();") callback))
+  [method-name args callback]
+  (.eval (chrome/inspected-window) (str "kamituel.s_tlbx_probe.probe." method-name "(" args ");") callback))
 
 (defn read-from-app
   [{:keys [put-fn]}]
   (probe-ipc
-    "read_recordings"
+    "read_recordings" ""
     (fn [response err]
       (if err
         (put-fn [:cmd/probe-error])
         (let [{:keys [messages state-snapshots probe-init-timestamp]}
               (transit/read transit-reader response)]
-          (put-fn [:cmd/set-probe-init-ts probe-init-timestamp])
           (put-fn [:cmd/new-messages messages])
-          (put-fn [:cmd/new-state-snapshots state-snapshots]))))))
+          (put-fn [:cmd/state-snapshots state-snapshots]))))))
+
+(defn add-ignored-cmd-type
+  [{:keys [put-fn msg-payload]}]
+  (probe-ipc "ignore_cmd_type" (str "'" (namespace msg-payload) "/" (name msg-payload) "'")
+    (fn [response err]
+      (when err
+        (put-fn [:cmd/probe-error])))))
+
+(defn remove-ignored-cmd-type
+  [{:keys [put-fn msg-payload]}]
+  (probe-ipc "stop_ignoring_cmd_type" (str "'" (namespace msg-payload) "/" (name msg-payload) "'")
+    (fn [response err]
+      (when err
+        (put-fn [:cmd/probe-error])))))
 
 (defn mk-state
   [put-fn]
@@ -35,4 +48,6 @@
   [cmp-id]
   {:cmp-id      cmp-id
    :state-fn    mk-state
-   :handler-map {:cmd/read-from-app read-from-app}})
+   :handler-map {:relay/read-from-app read-from-app
+                 :relay/add-ignored-cmd-type add-ignored-cmd-type
+                 :relay/remove-ignored-cmd-type remove-ignored-cmd-type}})

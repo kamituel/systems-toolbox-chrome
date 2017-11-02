@@ -7,20 +7,20 @@
 (defn view-fn
   [{:keys [observed local cmd]}]
   (let [snapshots (:state-snapshots @observed)
-        _ (when-not(:selected-snapshot-cmp-id @local)
+        _ (when-not (:selected-snapshot-cmp-id @local)
             (swap! local assoc :selected-snapshot-cmp-id (first (keys snapshots))))
         selected-snapshot (:selected-snapshot-cmp-id @local)]
     (if-not (empty? snapshots)
       [:div
         [:ul.tabs
-         (for [[cmp-id snapshot] (sort snapshots)]
+         (for [[cmp-id snapshot-map] (sort snapshots)]
            ^{:key cmp-id}
            [:li (merge {:on-click (u/cbk #(swap! local assoc :selected-snapshot-cmp-id cmp-id))}
                        (when (= cmp-id selected-snapshot)
                          {:class :selected}))
             (str cmp-id)])]
         [:div.edn-tree
-         (u/data->hiccup (-> snapshots (get-in [selected-snapshot]) :msg-payload :snapshot)
+         (u/data->hiccup (-> snapshots (get-in [selected-snapshot]) :snapshot)
                          (-> @local :expanded selected-snapshot)
                          (fn [path]
                            (fn [evt]

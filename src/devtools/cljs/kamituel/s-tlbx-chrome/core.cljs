@@ -54,9 +54,10 @@
 
        ;; Send a periodic message to relay to read the latest recordings from the app.
        [:cmd/route {:from :cmp/scheduler :to :cmp/relay}]
+       [:cmd/route {:from :cmp/state     :to :cmp/relay :only [:relay/add-ignored-cmd-type :relay/remove-ignored-cmd-type]}]
        [:cmd/send {:to :cmp/scheduler
                    :msg [:cmd/schedule-new
-                         {:timeout 1000 :id :cmd/read-from-app :message [:cmd/read-from-app]
+                         {:timeout 1000 :id :relay/read-from-app :message [:relay/read-from-app]
                           :repeat true :initial true}]}]])
     ;; When not running as a Chrome DevTools extension, use mock data to populate some of the UI.
     ;; This allows for in-browser development workflow.

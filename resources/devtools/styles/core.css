@@ -265,62 +265,15 @@ table td {
 #filters table {
   color: black;
 }
-#filters table th.type {
-  width: 25px;
+#filters table th:first-child {
+  width: auto;
 }
-#filters table th.src {
-  width: 30%;
-}
-#filters table th.dst {
-  width: 30%;
-}
-#filters table th.cmd {
-  width: 30%;
-}
-#filters table th.action {
+#filters table td:last-child {
   width: 25px;
 }
 #filters table td span[class*="icon-"] {
   font-size: 16px;
-}
-#filters table td.remove span {
   cursor: pointer;
-}
-#filters table td.remove span:hover {
-  color: #dd3333;
-}
-#filters table td.single-col {
-  padding: 5px 25px 5px 25px;
-}
-#filters table tfoot td .toggle-button {
-  width: 50px;
-  height: 16px;
-  color: white;
-  padding: 0;
-  font-size: 12px;
-  margin-left: 0;
-}
-#filters table tfoot td .toggle-button:before {
-  background-color: #cc2222;
-}
-#filters table tfoot td .toggle-button:after {
-  background-color: #22aa55;
-}
-#filters table tfoot td .toggle-text {
-  font-size: 12px;
-  display: block;
-  padding-left: 50px;
-  height: 18px;
-}
-#filters table tfoot td .toggle-text[data-state="off"] {
-  color: #888;
-}
-#filters table tfoot td .toggle-text[data-state="on"] {
-  color: #22aa55;
-}
-#filters table tfoot td span[class*="icon-"] {
-  float: right;
-  margin-top: -14px;
 }
 span[class*="icon-"].warn {
   color: #dd2222;
