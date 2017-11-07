@@ -17,7 +17,7 @@
 (defn read-from-app
   [{:keys [put-fn]}]
   (probe-ipc
-    "read_recordings" ""
+    "read_logs" ""
     (fn [response err]
       (if err
         (put-fn [:cmd/probe-error])

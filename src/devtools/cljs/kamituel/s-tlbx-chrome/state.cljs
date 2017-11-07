@@ -6,8 +6,7 @@
 ;; A copy used only to persist message filters so they're there when dev tool is re-opened.
 ;; To retrieve it via JS: localStorage.getItem('["k","settings"]')
 (defonce settings
-  (local-storage (atom {:message-limit 500
-                        :ignored-cmds-types #{}}) :settings))
+  (local-storage (atom {:ignored-cmds-types #{}}) :settings))
 
 (defn initial-state
   []
@@ -15,14 +14,6 @@
    ;; List of messages captured. Oldest first. When messages are filtered, they are
    ;; removed/not stored here.
    :messages '()
-   ;; Total number of messages captured since extension started working. Does include messages
-   ;; filtered and messages that have been removed because message-limit was reached.
-   :total-messages-count 0
-   ;; Number of messages to show on the list.
-   :message-limit (:message-limit @settings)
-   ;; User is allowed to adjust :message-limit. These set the min and max value possible.
-   :message-limit-min 50
-   :message-limit-max 2000
    ;; State snapshots. Keys are component ID's, values are the latest snapshots captured.
    :state-snapshots {}
    ;; Currently selected message.
@@ -33,7 +24,7 @@
    :view :messages})
 
 (def persistent-settings
-  [:ignored-cmds-types :message-limit])
+  [:ignored-cmds-types])
 
 (defn persist-settings
   [cmp-state]
@@ -49,26 +40,16 @@
   "Analyzes new messages and appends them to the :messages list in a state."
   [{:keys [cmp-state msg-payload]}]
   #_(.time js/console "handle-new-messages")
-  (let [{:keys [view total-messages-count message-limit]} @cmp-state
-        assign-message-idx (fn [total-count msgs]
-                             (map-indexed #(assoc %2 :idx (+ %1 1 total-count)) msgs))
-        messages (assign-message-idx total-messages-count msg-payload)]
+  (let [{:keys [view]} @cmp-state
+        messages (map-indexed #(assoc %2 :idx (inc %1)) msg-payload)]
    #_(.timeEnd js/console "handle-new-messages")
    (when (= :probe-error view) (show-component {:cmp-state cmp-state :msg-payload :cmp/messages}))
-   (swap! cmp-state update-in [:total-messages-count] (partial + (count messages)))
-   (swap! cmp-state update-in [:messages] (fn [msgs]
-                                            (->> (concat msgs messages)
-                                                 (take-last message-limit))))))
+   (swap! cmp-state assoc :messages messages)))
 
 (defn handle-state-snapshots
   "Handle all state messages. Only one state for each component is stored."
   [{:keys [cmp-state msg-payload]}]
-  (let [last-snapshot-for-each-cmp (->> msg-payload
-                                        (group-by :cmp-id)
-                                        (map (fn [[cmp-id snapshots]]
-                                               [cmp-id (first snapshots)]))
-                                        (into {}))]
-   (swap! cmp-state assoc :state-snapshots last-snapshot-for-each-cmp)))
+  (swap! cmp-state assoc :state-snapshots msg-payload))
 
 (defn show-message-details
   "Makes one message selected, so it can be shown in the sidebar."
@@ -126,11 +107,6 @@
   (reset! cmp-state (initial-state))
   (show-component {:cmp-state cmp-state :msg-payload :probe-error}))
 
-(defn set-message-limit
-  [{:keys [cmp-state msg-payload]}]
-  (swap! cmp-state assoc :message-limit msg-payload)
-  (persist-settings cmp-state))
-
 (defn mk-state
   [put-fn]
   (let [{:keys [ignored-cmds-types] :as s} (initial-state)]
@@ -152,6 +128,5 @@
                  :cmd/clear-state-snapshots   clear-state-snapshots
                  :cmd/next-younger-message    next-younger-message
                  :cmd/next-older-message      next-older-message
-                 :cmd/set-message-limit       set-message-limit
                  :cmd/reset                   reset
                  :cmd/show-component          show-component}})

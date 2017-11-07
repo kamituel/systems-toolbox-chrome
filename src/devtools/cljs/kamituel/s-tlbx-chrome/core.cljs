@@ -10,8 +10,7 @@
             [kamituel.s-tlbx-chrome.state-snapshots :as state-snapshots]
             [kamituel.s-tlbx-chrome.toolbox :as toolbox]
             [kamituel.s-tlbx-chrome.relay :as relay]
-            [kamituel.s-tlbx-chrome.message-details :as msg-details]
-            [kamituel.s-tlbx-chrome.settings :as settings]))
+            [kamituel.s-tlbx-chrome.message-details :as msg-details]))
 
 (enable-console-print!)
 
@@ -29,19 +28,17 @@
        (filters/cmp-map         :cmp/filters)
        (state-snapshots/cmp-map :cmp/state-snapshots)
        (msg-details/cmp-map     :cmp/msg-details)
-       (toolbox/cmp-map         :cmp/toolbox)
-       (settings/cmp-map        :cmp/settings)]]
+       (toolbox/cmp-map         :cmp/toolbox)]]
 
      [:cmd/route {:from :cmp/messages :to :cmp/state}]
      [:cmd/route {:from :cmp/state-snapshots :to :cmp/state}]
      [:cmd/route {:from :cmp/msg-details :to :cmp/state}]
      [:cmd/route {:from :cmp/toolbox :to :cmp/state}]
      [:cmd/route {:from :cmp/filters :to :cmp/state}]
-     [:cmd/route {:from :cmp/settings :to :cmp/state}]
 
      [:cmd/observe-state {:from :cmp/state
                           :to [:cmp/messages :cmp/state-snapshots :cmp/msg-details :cmp/toolbox
-                               :cmp/filters :cmp/settings]}]
+                               :cmp/filters]}]
 
      ;; Show messages panel by default.
      [:cmd/send {:to :cmp/state :msg [:cmd/show-component :cmp/messages]}]])
