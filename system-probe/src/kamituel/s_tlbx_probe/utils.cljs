@@ -1,6 +1,7 @@
 (ns kamituel.s-tlbx-probe.utils
   (:require goog.object
             [clojure.data :refer [diff]]
+            [clojure.walk :as walk]
             [cljs.pprint :as pprint]))
           
 (defn number->str
@@ -138,20 +139,25 @@
 (defn sanitize-value
   [v]
   (cond
+    ;; Collections:
     (map? v) (into {} (map (fn [[k v]]
                              (let [k (if (or (string? k) (keyword? k)) k (hash k))]
                               [k (sanitize-value v)])) v))
     (set? v) (set (map sanitize-value v))
     (vector? v) (vec (map sanitize-value v))
     (list? v) (map sanitize-value v)
-    ;(uuid-string? v) v ;; TODO:
-    (string? v) (str "[[STRING:" (count v) "]]")
-    (number? v) "[[NUMBER]]"
-    (fn? v) "[[FUNCTION]]"
+    
+    ;; Not sanitized values:
+    (uuid? v) v
     (keyword? v) v
     (nil? v) nil
     (true? v) true
     (false? v) false
+
+    ;; Sanitized values:
+    (string? v) (str "[[STRING:" (count v) "]]")
+    (number? v) "[[NUMBER]]"
+    (fn? v) "[[FUNCTION]]"
     :else "[[UNKNOWN-TYPE]]"))
 
 (defn sanitize-message
@@ -182,21 +188,25 @@
     (js/document.body.appendChild link)
     (.click link)))
 
+(defn prepare-logs
+  [all-snapshots snapshots-diffs messages]
+  (let [messages (correlate-sender-with-receivers messages)]
+    {:timeline (->> (concat messages snapshots-diffs)
+                    (sort-by :ts)
+                    fix-message-order)
+     :final-state-snapshots all-snapshots}))
+
 (defn save-logs
-  [raw-all-snapshots raw-snapshots-diffs raw-messages]
-  (let [messages (->> raw-messages
-                      correlate-sender-with-receivers
-                      (map sanitize-message))
-        snapshots-diffs (map sanitize-snapshot-diff raw-snapshots-diffs)
-        messages-and-diffs (->> (concat messages snapshots-diffs)
-                                (sort-by :ts)
-                                fix-message-order)
-        logs {:timeline messages-and-diffs
-              :final-state-snapshots (into {} (map (fn [[k v]] [k (sanitize-state-snapshot v)]) raw-all-snapshots))}
-        now (js/Date.)
-        date-str (str (.getUTCFullYear now) "-" (inc (.getUTCMonth now)) "-" (.getUTCDate now)
-                      "-" (.getUTCHours now) "-" (.getUTCMinutes now) "-" (.getUTCSeconds now))
-        filename (str "console-debug-log-" date-str ".edn")]
-    (js/console.log "Saving <<" filename ">> with " (count messages) " messages and "
-      (count snapshots-diffs) " snapshot diffs.")
-    (save-file filename (with-out-str (pprint/pprint logs)))))
+  [& args]
+  (try
+    (let [logs (apply prepare-logs args)
+          now (js/Date.)
+          date-str (str (.getUTCFullYear now) "-" (inc (.getUTCMonth now)) "-" (.getUTCDate now)
+                        "-" (.getUTCHours now) "-" (.getUTCMinutes now) "-" (.getUTCSeconds now))
+          filename (str "console-debug-log-" date-str ".edn")]
+      (js/console.log "Saving <<" filename ">> with " (count (:timeline logs)) " events (messages "
+        "and snapshot changes) and " (count (:final-state-snapshots logs)) " final snapshots.")
+      (save-file filename (with-out-str (pprint/pprint logs))))
+    (catch js/Error e
+      (js/console.error "Could not generate or save issue report file.")
+      (js/console.error e))))

@@ -15,6 +15,9 @@
          :state-snapshots-latest {}
          ;; Diffs of state snapshots.
          :state-snapshots-diffs '()
+         ;; If true, any non-keyword, non-primitive values will be obscured as soon
+         ;; as it's received. Doesn't apply to :state-snapshots-latest.
+         :sanitize-immediately? true
          ;; Messages or state snapshot diffs older than that will be removed.
          ;; Latest state snapshots are always kept.
          :max-age-ms 0
@@ -49,8 +52,9 @@
   [{:keys [current-state] :as msg-map}]
   #_(js/console.log "Handling message " (:active? current-state) " n msgs " (count (:messages current-state)))
   (when (:active? current-state)
-    (let [{:keys [init-ts max-age-ms ignored-cmds-types]} current-state
-          msg (u/raw-msg->map init-ts msg-map)]
+    (let [{:keys [init-ts max-age-ms ignored-cmds-types sanitize-immediately?]} current-state
+          msg-insecure (u/raw-msg->map init-ts msg-map)
+          msg (if sanitize-immediately? (u/sanitize-message msg-insecure) msg-insecure)]
       (when-not (contains? ignored-cmds-types (:command msg))
         {:new-state (update current-state :messages (partial conj-and-drop-too-old max-age-ms) msg)}))))
 
@@ -58,28 +62,29 @@
   [{:keys [current-state] :as msg-map}]
   #_(js/console.log "Handling state snapshot " (:active? current-state) "n s diffs " (count (:state-snapshots-diffs current-state)))
   (when (:active? current-state)
-    (let [{:keys [init-ts max-age-ms ignored-snapshots-cmp-ids]} current-state
+    (let [{:keys [init-ts max-age-ms ignored-snapshots-cmp-ids sanitize-immediately?]} current-state
           {:keys [cmp-id] :as snapshot} (u/raw-state-snapshot->map init-ts msg-map)
           prev-snapshot (get-in current-state [:state-snapshots-latest cmp-id])
-          snapshot-diff (when prev-snapshot (u/diff-state-snapshots prev-snapshot snapshot))]
+          snapshot-diff-insecure (when prev-snapshot (u/diff-state-snapshots prev-snapshot snapshot))
+          snapshot-diff (if sanitize-immediately? (u/sanitize-snapshot-diff snapshot-diff-insecure) snapshot-diff-insecure)]
       (when-not (contains? ignored-snapshots-cmp-ids cmp-id)
         {:new-state
         (-> current-state
           (assoc-in [:state-snapshots-latest cmp-id] snapshot)
           (cond-> snapshot-diff (update :state-snapshots-diffs (partial conj-and-drop-too-old max-age-ms) snapshot-diff)))}))))
 
-(defn activate
-  [max-age-ms]
-  (js/console.log "Probe is now active, with a max age of <<" max-age-ms ">> ms.")
-  (swap! state assoc
-    :active? true
-    :max-age-ms max-age-ms))
-
 (defn ^:export dump-logs-to-a-file
-  []
+  [_msg]
   (js/console.log "Dupming logs to the file.")
-  (let [{:keys [state-snapshots-latest state-snapshots-diffs messages]} @state]
-    (u/save-logs state-snapshots-latest state-snapshots-diffs messages)))
+  (let [{:keys [state-snapshots-latest state-snapshots-diffs messages sanitize-immediately?]} @state]
+    (u/save-logs
+      ;; State snapshots aren't sanitized when are received, to faciliate diffing with the previous
+      ;; snapshot. It is not insecure, as the very same snapshot is overwritten as soon as the next
+      ;; one arrives, and the very same snapshot is stored in the origianal component's state anyway.
+      (into {} (map (fn [[k v]] [k (u/sanitize-state-snapshot v)]) state-snapshots-latest))
+      ;; Diffs and messages might've already been sanitized.
+      (if sanitize-immediately? state-snapshots-diffs (map u/sanitize-snapshot-diff state-snapshots-diffs))
+      (if sanitize-immediately? messages (map u/sanitize-message messages)))))
 
 (defn ^:export read-logs
   "Used by a Chrome DevTools extension."
@@ -109,24 +114,32 @@
     (swap! state update :ignored-cmds-types #(apply disj % cmd-types))))
 
 (defn mk-state
-  []
+  [sanitize-logs logs-retention-ms]
+  (swap! state assoc
+    :max-age-ms logs-retention-ms
+    :sanitize-immediately? sanitize-logs
+    :active? true)
+  (js/console.log "Probe is now active, with a max age of <<" logs-retention-ms ">> ms.")
   {:state state})
 
 (defn cmp-map
-  [cmp-id]
+  [cmp-id sanitize-logs logs-retention-ms]
   {:cmp-id       cmp-id
-   :state-fn     mk-state
+   :state-fn     #(mk-state sanitize-logs logs-retention-ms)
    :handler-map {:firehose/cmp-put           handle-message
                  :firehose/cmp-recv          handle-message
-                 :firehose/cmp-publish-state handle-state-snapshot}
+                 :firehose/cmp-publish-state handle-state-snapshot
+                 :s-tlbx-probe/dump-logs-to-a-file dump-logs-to-a-file}
    :opts         {:reload-cmp false ;; TODO: verify it helps with figwheel reloading.
                   :validate-in false
                   :validate-out false
                   :validate-state false}})
 
 (defn init
-  [switchboard]
+  [switchboard & {:keys [sanitize-immediately? logs-retention-ms]
+                  :or {sanitize-immediately? true
+                       :logs-retention-ms -1}}]
   (sb/send-mult-cmd
     switchboard
-    [[:cmd/init-comp #{(cmp-map :s-tlbx-probe/probe)}]
+    [[:cmd/init-comp #{(cmp-map :s-tlbx-probe/probe sanitize-immediately? logs-retention-ms)}]
      [:cmd/attach-to-firehose :s-tlbx-probe/probe]]))
