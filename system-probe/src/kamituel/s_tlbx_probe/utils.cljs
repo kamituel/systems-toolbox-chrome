@@ -162,10 +162,25 @@
 
 (defn sanitize-message
   [msg]
-  (-> msg
-    (update :payload sanitize-value)
-    (update :tag sanitize-value)
-    (update-in [:meta :tag] sanitize-value)))
+  (let [meta-in-out-keys (fn meta-in-out-keys [meta]
+                          (filter (fn [k]
+                                    (let [v (get meta k)]
+                                      (and (map? v)
+                                           (= #{:in-ts :out-ts} (set (keys v))))))
+                            (keys meta)))]
+    (-> msg
+      (update :payload sanitize-value)
+      (update :tag sanitize-value)
+      (update :meta (fn [meta]
+                      ;; Anything can be added to meta by the app, so the whole thing neeeds to be
+                      ;; sanitized, with the exception of fields we know are safe, because
+                      ;; systems-toolbox overrides those.
+                      (-> (sanitize-value meta)
+                          (merge (select-keys meta [:cmp-seq :corr-id]))
+                          ;; Any submap that contains only :in-ts and :out-ts that are numbers,
+                          ;; is safe too. Unfortunately, keys where those maps are stored are unkown,
+                          ;; as they're cmp-id's that each app will assign arbitrarily.
+                          (merge (select-keys meta (meta-in-out-keys meta)))))))))
 
 (defn sanitize-snapshot-diff
   [snapshot-diff]
