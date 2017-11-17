@@ -3,9 +3,13 @@
   (:require [matthiasn.systems-toolbox.component :as comp]
             [kamituel.s-tlbx-chrome.chrome :as chrome]
             [cognitect.transit :as transit]
+            [com.cognitect.transit.types :as transit.types]
             [clojure.string :as s]
             [clojure.walk :refer [postwalk]]))
 
+;; In order for UUID's deserialised from Transit to satisfy uuid?.
+;; https://github.com/cognitect/transit-cljs/issues/18
+(extend-type transit.types/UUID IUUID)
 
 (def transit-reader
   (transit/reader :json))
@@ -19,6 +23,7 @@
   (probe-ipc
     "read_logs" ""
     (fn [response err]
+      (prn "r" (subs response 0 100))
       (if err
         (put-fn [:cmd/probe-error])
         (let [{:keys [messages state-snapshots probe-init-timestamp]}

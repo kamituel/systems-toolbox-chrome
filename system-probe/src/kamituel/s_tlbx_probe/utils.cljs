@@ -136,6 +136,16 @@
       :ts (:ts s2)
       :ts-rel (:ts-rel s2)})))
 
+(def uuid-pattern
+  (let [block #(str "([0-9a-fA-F]{" % "})")]
+    (re-pattern (str "^" (block 8) "-" (block 4) "-" (block 4) "-" (block 4) "-" (block 12) "$"))))
+
+(defn valid-uuid?
+  "ClojureScript doesn't ensure that #uuid is a valid UUID."
+  [uuid]
+  (and (uuid? uuid)
+       (re-matches uuid-pattern (str uuid))))
+
 (defn sanitize-value
   [v]
   (cond
@@ -148,13 +158,14 @@
     (list? v) (map sanitize-value v)
     
     ;; Not sanitized values:
-    (uuid? v) v
     (keyword? v) v
     (nil? v) nil
     (true? v) true
     (false? v) false
+    (valid-uuid? v) v
 
     ;; Sanitized values:
+    (uuid? v) (str "[[UUID]]")
     (string? v) (str "[[STRING:" (count v) "]]")
     (number? v) "[[NUMBER]]"
     (fn? v) "[[FUNCTION]]"
