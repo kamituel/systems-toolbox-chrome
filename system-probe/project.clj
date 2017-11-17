@@ -1,4 +1,4 @@
-(defproject kamituel/s-tlbx-probe "0.2.4"
+(defproject kamituel/s-tlbx-probe "0.2.5"
   :description "Systems Toolbox Probe for use with Chrome DevTools extension."
   :url "https://github.com/kamituel/systems-toolbox-chrome"
   :license {:name "Eclipse Public License"

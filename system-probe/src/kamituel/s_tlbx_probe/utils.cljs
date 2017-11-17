@@ -156,6 +156,7 @@
     (set? v) (set (map sanitize-value v))
     (vector? v) (vec (map sanitize-value v))
     (list? v) (map sanitize-value v)
+    (sequential? v) (map sanitize-value v)
     
     ;; Not sanitized values:
     (keyword? v) v
