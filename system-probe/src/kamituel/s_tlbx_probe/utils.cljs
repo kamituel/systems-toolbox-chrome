@@ -206,14 +206,16 @@
 
 (defn save-file
   [filename contents-str]
-  (let [blob (js/Blob. (clj->js [contents-str]))
-        link (js/document.createElement "a")
-        url (js/window.URL.createObjectURL blob)]
-    (doto link
-      (goog.object/set "download" filename)
-      (goog.object/set "href" url))
-    (js/document.body.appendChild link)
-    (.click link)))
+  (let [blob (js/Blob. (clj->js [contents-str]))]
+    (if js/navigator.msSaveBlob
+      (js/navigator.msSaveBlob blob filename)
+      (let [link (js/document.createElement "a")
+            url (js/window.URL.createObjectURL blob)]
+        (doto link
+          (goog.object/set "download" filename)
+          (goog.object/set "href" url))
+        (js/document.body.appendChild link)
+        (.click link)))))
 
 (defn prepare-logs
   [all-snapshots snapshots-diffs messages]
