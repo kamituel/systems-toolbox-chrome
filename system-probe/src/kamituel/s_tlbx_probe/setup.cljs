@@ -14,7 +14,7 @@
 (defn enable-firehose
   "Given component map, merges current :opts with cmp-opts that enable firehose support."
   [cmp-map]
-  (update cmp-map :opts #(merge (or % {}) cmp-opts)))
+  (update cmp-map :opts #(merge cmp-opts (or % {}))))
 
 (defn with-firehose
   "If set to be enabled, enables msgs and state snapshots for each component map supplied."
