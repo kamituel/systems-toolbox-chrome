@@ -1,9 +1,8 @@
 (ns kamituel.s-tlbx-probe.utils
   (:require goog.object
             [clojure.data :refer [diff]]
-            [clojure.walk :as walk]
-            [cljs.pprint :as pprint]))
-          
+              [cljs.pprint :as pprint]))
+
 (defn number->str
   "Converts a number to a string with a given number of decimal places.
   I.e. for three decimal places:
@@ -131,10 +130,10 @@
   (let [[removed added _] (diff (:snapshot s1) (:snapshot s2))]
     (when (or removed added)
       {:removed removed
-      :added added
-      :cmp-id (:cmp-id s2)
-      :ts (:ts s2)
-      :ts-rel (:ts-rel s2)})))
+       :added added
+       :cmp-id (:cmp-id s2)
+       :ts (:ts s2)
+       :ts-rel (:ts-rel s2)})))
 
 (def uuid-pattern
   (let [block #(str "([0-9a-fA-F]{" % "})")]
@@ -151,13 +150,13 @@
   (cond
     ;; Collections:
     (map? v) (into {} (map (fn [[k v]]
-                             (let [k (if (or (string? k) (keyword? k)) k (hash k))]
+                            (let [k (if (or (string? k) (keyword? k)) k (hash k))]
                               [k (sanitize-value v)])) v))
     (set? v) (set (map sanitize-value v))
     (vector? v) (vec (map sanitize-value v))
     (list? v) (map sanitize-value v)
     (sequential? v) (map sanitize-value v)
-    
+
     ;; Not sanitized values:
     (keyword? v) v
     (nil? v) nil
@@ -233,9 +232,12 @@
           date-str (str (.getUTCFullYear now) "-" (inc (.getUTCMonth now)) "-" (.getUTCDate now)
                         "-" (.getUTCHours now) "-" (.getUTCMinutes now) "-" (.getUTCSeconds now))
           filename (str "console-debug-log-" date-str ".edn")]
-      (js/console.log "Saving <<" filename ">> with " (count (:timeline logs)) " events (messages "
-        "and snapshot changes) and " (count (:final-state-snapshots logs)) " final snapshots.")
-      (save-file filename (with-out-str (pprint/pprint logs))))
+      (js/console.log (str "Saving <<" filename ">> with " (count (:timeline logs)) " events (messages "
+        "and snapshot changes) and " (count (:final-state-snapshots logs)) " final snapshots."))
+      (let [contents (with-out-str (pprint/pprint logs))]
+        (js/console.log "Wrote dump file contents to string. Saving to the file...")
+        (save-file filename contents)
+        (js/console.log "Saved.")))
     (catch js/Error e
       (js/console.error "Could not generate or save issue report file.")
       (js/console.error e))))

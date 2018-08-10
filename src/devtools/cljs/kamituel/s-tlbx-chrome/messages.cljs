@@ -32,6 +32,12 @@
   (if (:scrolled-to-the-bottom @local)
          (scroll-to-the-bottom (by-id "messages"))))
 
+(defn human-readable-keyword
+  [kw]
+  (if (keyword? kw)
+    (s/replace (str kw) #"(\w).*?\." "$1.")
+    (str kw)))
+
 (defn view-fn
   [{:keys [observed local cmd]}]
   (let [{:keys [messages selected-message selected-tag]} @observed]
@@ -51,9 +57,9 @@
                                          (= selected-tag tag) (conj "highlighted")))}
          [:td idx]
          [:td ts-rel]
-         [:td (str src-cmp)]
-         [:td (str dst-cmp)]
-         [:td (str command)]])]))
+         [:td (human-readable-keyword src-cmp)]
+         [:td (human-readable-keyword dst-cmp)]
+         [:td (human-readable-keyword command)]])]))
 
 (defn cmp-map
   [cmp-id]
